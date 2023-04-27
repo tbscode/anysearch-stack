@@ -2,7 +2,7 @@
 
 Anysearch Stack is a production-ready Kubernetes deployment for building dynamic web applications. It includes a Django backend and a React + Next.js frontend.
 
-This project is a fork of [Tim's Stack](https://github.com/tbscode/tiny-django).
+This project is uses [`Tim's Stack`](https://github.com/tbscode/tiny-django).
 
 ## Prerequisites
 
@@ -34,3 +34,21 @@ The frontend can overwrite any page path except `/api`, `/admin`, `/static`, and
 `daisyui` & `tailwindcss` are also set up for the frontend.
 
 To ensure that Next.js pages are hydrated with the backend data from the Django container, access the frontend through `localhost:8000/` instead of `localhost:3000/`. Pages should be developed to work both with and without backend data.
+
+## Kubernetes
+
+You can also build a replica for the production build or fully develop in kubernetes locally!
+I recommend `microk8s` for a quick mininmal but complete kubernetes dist.
+
+Use `make microk8s_setup` to prepare the local `microk8s` setup.
+
+Use `make frontend_build_push` and `make backend_build_push` to build frontend and backend container images and push then to the local registry which was initalized in the setup.
+
+Now you can install the helm chart with `make helm_install`, check that all deployments and servies are running with `make microk8s_status` and check the running pages at local host http port 80 by vising plain `localhost`.
+
+```
+this stack was provided by Tim Schupp, (Tim Benjamin Software)
+tim@timschupp.de
+t1m.me
+(C) `README.md`, `helm-chart/*`, `back/*`
+```
