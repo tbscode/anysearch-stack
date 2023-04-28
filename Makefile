@@ -11,14 +11,14 @@ backend_migrate_static:
 	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py collectstatic --noinput
 
 backend_build:
-	docker build --progress=plain -t localhost:32000/backend-image:latest -f Dockerfile.back_dev back
+	docker build -t localhost:32000/backend-image:latest -f Dockerfile.back_dev back
 	$(MAKE) backend_migrate_static
 
 # we have to build the local backend first to extract statics
 backend_build_prod:
 	$(MAKE) backend_build
 	$(MAKE) backend_migrate_static
-	docker build --progress=plain -t localhost:32000/backend-image-prod:latest -f Dockerfile.back back
+	docker build -t localhost:32000/backend-image-prod:latest -f Dockerfile.back back
 
 backend_push:
 	docker push localhost:32000/backend-image:latest
@@ -26,8 +26,7 @@ backend_push_prod:
 	docker push localhost:32000/backend-image-prod:latest
 backend_run:
 	echo "Running backend $(backend_img_sha)"
-	docker run --init --add-host=host.docker.internal:host-gateway -p 8000:8000 -v $(root_dir)/back:/back -it $(backend_img_sha)
-
+	docker run --init --add-host=host.docker.internal:host-gateway -p 8000:8000 -v "$(root_dir)/back:/back" -it $(backend_img_sha)
 
 backend_build_push:
 	$(MAKE) backend_build
@@ -38,9 +37,9 @@ backend_build_push_prod:
 	$(MAKE) backend_push_prod
 	
 frontend_build:
-	docker build --progress=plain -t localhost:32000/frontend-image:latest -f Dockerfile.front_dev front
+	docker build -t localhost:32000/frontend-image:latest -f Dockerfile.front_dev front
 frontend_build_prod:
-	docker build --progress=plain -t localhost:32000/frontend-image-prod:latest -f Dockerfile.front front
+	docker build -t localhost:32000/frontend-image-prod:latest -f Dockerfile.front front
 frontend_push:
 	docker push localhost:32000/frontend-image:latest
 frontend_push_prod:
