@@ -37,6 +37,9 @@ DATABASES = {
     }
 }
 
+REDIS_URL = os.environ.get(
+    "REDIS_URL", "redis://host.docker.internal:6379")
+
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": 'drf_spectacular.openapi.AutoSchema'
@@ -146,4 +149,15 @@ JAZZMIN_SETTINGS = {
 
 JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": True,
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        # "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels_redis.pubsub.RedisPubSubChannelLayer",
+        # "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    }
 }

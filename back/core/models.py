@@ -22,6 +22,11 @@ class User(AbstractUser):
     settings = models.OneToOneField(
         'UserSetting', on_delete=models.CASCADE)
 
+    first_name = models.CharField(max_length=100, blank=True, null=True)
+
+    projects = models.ManyToManyField(
+        'Project', related_name='user_projects', blank=True, null=True)
+
 
 class UserProfile(models.Model):
     first_name = models.CharField(max_length=50)
@@ -93,6 +98,12 @@ class Project(models.Model):
         choices=LanguageChoices.choices,
         default=LanguageChoices.ENGLISH,
         max_length=255)
+
+    participants = models.ManyToManyField(
+        User, related_name='project_participants', null=True, blank=True)
+
+    users_connected = models.ManyToManyField(
+        User, related_name='project_users_connected', null=True, blank=True)
 
 
 class ChatMessage(models.Model):

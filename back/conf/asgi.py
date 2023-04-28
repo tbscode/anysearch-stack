@@ -20,9 +20,16 @@ if settings.USE_NEXTJS_PROXY_ROUTES:
         0, path("_next/webpack-hmr", NextJSProxyWebsocketConsumer.as_asgi()))
 
 
+def get_urls_patterns():
+    from core.consumer import ChatConsumer
+    return [path("_next/webpack-hmr", NextJSProxyWebsocketConsumer.as_asgi()),
+            re_path(rf'^api/chat/ws$',
+                    ChatConsumer.as_asgi())]
+
+
 application = ProtocolTypeRouter(
     {
         "http": URLRouter(http_routes),
-        "websocket": AuthMiddlewareStack(URLRouter(websocket_routers)),
+        "websocket": AuthMiddlewareStack(URLRouter(get_urls_patterns())),
     }
 )
