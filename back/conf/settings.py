@@ -42,6 +42,8 @@ DATABASES = {
     }
 }
 
+OPENAI_KEY = os.environ.get("OPENAI_KEY", "none")
+
 
 CSRF_TRUSTED_ORIGINS = ["https://t1m.me", "https://anysearch.t1m.me"]
 
