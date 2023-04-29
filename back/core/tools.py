@@ -47,6 +47,20 @@ def create_simple_user_setup():
         user.projects.add(project2)
         user.save()
 
+    # we do also add an AI user to eact of the projects
+    # TODO: these ai users should be added automaticly in the future
+    ai1 = User.objects.create("AiTest123!", username=f"AI1")
+    ai2 = User.objects.create("AiTest123!", username=f"AI2")
+    project1.participants.add(ai1)
+    project2.participants.add(ai2)
+
+    ai1.projects.add(project1)
+    ai2.projects.add(project2)
+    project1.ai_user = ai1
+    project2.ai_user = ai2
+    ai1.save()
+    ai2.save()
+
     # generate some random messages here
     languages_p1 = get_langs_in_project(project1)
     languages_p2 = get_langs_in_project(project2)
