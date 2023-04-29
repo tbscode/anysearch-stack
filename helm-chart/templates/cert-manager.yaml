@@ -1,15 +1,15 @@
 {{- if .Values.useCertManager }}
-apiVersion: cert-manager.io/v1
+apiVersion: certmanager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: {{ .Values.cert-manager.name }}
+  name: {{ .Values.certmanager.name }}
   namespace: {{ .Values.rootNamespace }}
 spec:
   acme:
-    email: {{ .Values.cert-manager.email }}
-    server: {{ .Values.cert-manager.apiServer }}
+    email: {{ .Values.certmanager.email }}
+    server: {{ .Values.certmanager.apiServer }}
     privateKeySecretRef:
-      name: {{ .Values.cert-manager.secretKeyName }}
+      name: {{ .Values.certmanager.secretKeyName }}
     solvers:
       - http01:
           ingress:

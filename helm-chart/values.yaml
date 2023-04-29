@@ -5,7 +5,7 @@ registryAuthRequired: false
 production: false
 development: true
 useRedis: false
-cert-manager:
+certmanager:
   secretKeyName: 'letsencrypt-prod'
   email: 'benjamin.tim@gmx.de'
   apiServer: 'https://acme-v02.api.letsencrypt.org/directory'
