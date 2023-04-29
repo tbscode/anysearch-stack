@@ -9,7 +9,7 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
-from core.models import Project, ChatMessage, User, ChatMessage
+from core.models import Project, ChatMessage, User, ChatMessage, get_langs_in_project
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 
@@ -57,6 +57,7 @@ def get_user_projects(user):
             "description": project.description,
             "participants": get_project_participants(project),
             "messages": get_project_messages(project),
+            "languages": get_langs_in_project(project),
         })
     return data
 
