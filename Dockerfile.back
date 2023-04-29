@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM ghcr.io/tbscode/tims-packages_alpine_langchain:latest
 
 COPY . /back
 WORKDIR /back
