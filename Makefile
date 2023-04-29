@@ -3,7 +3,7 @@ backend_img_sha := $(shell docker images -q localhost:32000/backend-image:latest
 frontend_img_sha := $(shell docker images -q localhost:32000/frontend-image:latest)
 kubernetes_namespace := anychat
 backend_pod_name := backend-deployment
-helm_installation_name := tiny-django
+helm_installation_name := anychat-helm
 
 backend_migrate_static:
 	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py makemigrations
