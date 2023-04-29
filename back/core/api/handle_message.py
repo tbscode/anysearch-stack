@@ -1,8 +1,10 @@
 from rest_framework_dataclasses.serializers import DataclassSerializer
 from typing import Literal, Optional, List, Dict
 from datetime import datetime
+from django.conf import settings
 from drf_spectacular.utils import extend_schema
 import base64
+from core.api.ai_handler import ToolGSearch
 from dataclasses import dataclass
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes, throttle_classes
@@ -11,10 +13,11 @@ from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
 from rest_framework import serializers
-from core.models import Project, ChatMessage
+from core.models import Project, ChatMessage, translate_to_all_langs_in_list, get_langs_in_project
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 from core.api.user_data import serialize_message
+from core.api.db_agent import DBChatAgent
 
 
 @dataclass
@@ -55,7 +58,7 @@ def handle_socket_message(data, user):
     - translating messsage in all languages for a users in a project
 
     """
-
+    print("CALLED HANDLE SOCKET MESSAGE")
     serializer = MessageRequestSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
@@ -72,11 +75,14 @@ def handle_socket_message(data, user):
 
     # translate the message in all languages that are used in that project
     # TODO ... which api to use again ?
+    translated_message = translate_to_all_langs_in_list(
+        data.text, get_langs_in_project(project), str(project.base_language))
 
     message = ChatMessage.objects.create(
         project=project,
         original_message=data.text,
         sender=user,
+        data=translated_message,
         **extra_params
     )
 
@@ -97,6 +103,67 @@ def handle_socket_message(data, user):
 
     # Now check if the message requres additional actions
     # if it starts with `@ai` an AI assistant should reply
+
+    def as_message(message, user="human"):
+        return {'type': user, 'data': {
+            'content': message, 'additional_kwargs': {}}}
+
     if data.text.startswith("@ai"):
-        # TODO ....
-        pass
+        # TODO ugly as fuck like that should be moved somehere else and implemented cleaner
+
+        past_4_messages = ChatMessage.objects.filter(
+            project=project).order_by("-time")[:5]
+        ai_user_for_project = project.ai_user
+
+        def send_message(message):
+            async_to_sync(channel_layer.group_send)(project_group_slug, {
+                "type": "broadcast_message",
+                "data": {
+                    "event": data.type,
+                    **serialize_message(message),
+                    "user": {
+                        "hash": str(ai_user_for_project.hash),
+                        "name": ai_user_for_project.first_name
+                    }
+                }
+            })
+            pass
+        # TODO: generate ai response based on past 4 messages
+
+        message_state = []
+
+        for message in past_4_messages:
+            if message.sender == ai_user_for_project:
+                message_state.append(as_message(
+                    message.original_message, "ai"))
+            else:
+                message_state.append(as_message(
+                    message.original_message, "human"))
+
+        agent = DBChatAgent(
+            ai_user=ai_user_for_project, project=project,
+            send_message_func=send_message,
+            memory_state=message_state,
+            model="gpt-3.5-turbo",
+            open_ai_api_key=settings.OPENAI_KEY,
+            buffer_memory_token_limit=500,
+            verbose=True,
+            tools=[
+                ToolGSearch(
+                    google_api_key=settings.GOOGLE_API_KEY,
+                    google_cse_id=settings.GOOGLE_APP_CSE_ID,
+                ).get_tooling()
+            ],
+        )
+
+        out, after_state, token_usage = agent(data.text.replace("@ai ", "", 1))
+
+        msg = ChatMessage.objects.create(
+            project=project,
+            original_message=out,
+            sender=ai_user_for_project,
+        )
+
+        send_message(msg)
+
+        # save the ai reply to the database

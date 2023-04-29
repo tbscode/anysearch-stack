@@ -33,6 +33,7 @@ def serialize_message(message):
     return {
         "time": str(message.time),
         "data": message.data,
+        "text": message.original_message,
         "sender": str(message.sender.hash),
         "hash": str(message.hash),
         "attachment": attachment,

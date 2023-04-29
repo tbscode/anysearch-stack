@@ -48,14 +48,8 @@ export default function Index({ state, updateTheme }): JSX.Element {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, []);
-  
-  console.log("DATA", state.data)
-  
-  if(!state.data){
-    return <div>loading...</div> 
-  }
 
-  const filteredProjects = state.data.projects.filter((project) =>
+  const filteredProjects = testData.projects.filter((project) =>
     project.name.toLowerCase().includes(inputValue.toLowerCase())
   );
 
@@ -154,11 +148,11 @@ export default function Index({ state, updateTheme }): JSX.Element {
         </div>
         <section
           id="chatInner"
-          className="w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end h-full overflow-scroll"
+          className="h-full w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end"
         >
-          <div className="h-80 overflow-scroll scroll-bottom" ref={scrollRef}>
-{state.data.projects[0].messages.map((message) => {
-  const isSender = message.sender === state.data.hash;
+          <div className="h-full overflow-scroll scroll-bottom" ref={scrollRef}>
+{testData.projects[0].messages.map((message) => {
+  const isSender = message.sender === testData.hash;
   const chatClass = isSender ? "chat-end" : "chat-start";
   const chatDirection = isSender ? "ml-2" : "mr-2";
 

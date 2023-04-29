@@ -42,6 +42,14 @@ DATABASES = {
     }
 }
 
+GOOGLE_API_KEY = os.environ.get(
+    "GOOGLE_API_KEY", "")
+
+GOOGLE_APP_CSE_ID = os.environ.get("GOOGLE_APP_CSE_ID", "")
+
+OPENAI_KEY = os.environ.get(
+    "OPENAI_KEY", "")
+
 
 CSRF_TRUSTED_ORIGINS = ["https://t1m.me", "https://anysearch.t1m.me"]
 

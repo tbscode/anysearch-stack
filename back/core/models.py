@@ -131,6 +131,9 @@ class Project(models.Model):
     users_connected = models.ManyToManyField(
         User, related_name='project_users_connected', null=True, blank=True)
 
+    ai_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True, related_name='ai_user')
+
 
 LANG_TO_SLUG = {y: x for x, y in LANGUAGES.items()}
 
