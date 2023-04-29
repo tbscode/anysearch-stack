@@ -55,13 +55,12 @@ export default function Index({ state, updateTheme }): JSX.Element {
     })
   }
   //hello alter
-  return (<div>
-      <button className="btn" onClick={() => {
-        loginRequest();
-      }}>
-        This is a trashy placeholder for a real login api
-      </button>
-      <input type="text" placeholder="username" onChange={(e) => {setLoginData({...loginData, username: e.target.value})}} className="input input-bordered input-sm w-full max-w-xs" />
-      <input type="text" placeholder="password" onChange={(e) => {setLoginData({...loginData, password: e.target.value})}} className="input input-bordered input-sm w-full max-w-xs" />
-    </div>);
+  return (
+    <main className='grid place-items-center h-screen'>
+      <div className='flex flex-col gap-2 w-full max-w-md'>
+        <input type="text" placeholder="Username" onChange={(e) => {setLoginData({...loginData, username: e.target.value})}} className="input input-bordered input-sm w-full p-4 py-6" />
+        <input type="text" placeholder="Password" onChange={(e) => {setLoginData({...loginData, password: e.target.value})}} className="input input-bordered input-sm w-full p-4 py-6" />
+        <button className="btn w-full" onClick={() => {loginRequest();}}>Login</button>
+      </div>
+    </main>);
 }
