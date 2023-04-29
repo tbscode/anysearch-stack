@@ -75,8 +75,10 @@ def handle_socket_message(data, user):
 
     # translate the message in all languages that are used in that project
     # TODO ... which api to use again ?
+    print("ATTEMPTING TRANSLATION")
     translated_message = translate_to_all_langs_in_list(
         data.text, get_langs_in_project(project), str(project.base_language))
+    print("TRANSLATION DONE", translated_message)
 
     message = ChatMessage.objects.create(
         project=project,
@@ -158,10 +160,17 @@ def handle_socket_message(data, user):
 
         out, after_state, token_usage = agent(data.text.replace("@ai ", "", 1))
 
+        print("MODEL", out, after_state, token_usage)
+
+        if isinstance(out, dict):
+            out = out['output']
+
         msg = ChatMessage.objects.create(
             project=project,
             original_message=out,
             sender=ai_user_for_project,
+            data=translate_to_all_langs_in_list(out, get_langs_in_project(
+                project), str(project.base_language)),
         )
 
         send_message(msg)

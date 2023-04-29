@@ -49,8 +49,8 @@ class DBChatAgent(MsgmateConversation):
         message = "done"
         message = ChatMessage.objects.create(
             project=self.project,
-            original_message=message,
+            original_message="done " + str(output),
             sender=self.ai_user,
         )
-        self.send_message_func("done " + str(output))
+        self.send_message_func(message)
         print(f"Finished tool usage \n", flush=True)

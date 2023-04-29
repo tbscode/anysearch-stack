@@ -3,6 +3,7 @@ Copyright Tim Schupp (C) tim@timschupp.de
 These are advanced wrappers of langchain classes
 I've originally developed them for msgmate.io
 """
+from langchain.schema import messages_from_dict, messages_to_dict, OutputParserException
 from rest_framework_dataclasses.serializers import DataclassSerializer
 from typing import Literal, Optional, List, Dict
 from datetime import datetime
@@ -85,7 +86,7 @@ class MsgmateConversation(ABC):
         self.token_usages = []
 
         llm = ChatOpenAI(
-            temperature=0,
+            temperature=0.3,
             openai_api_key=open_ai_api_key,
             model_name="gpt-3.5-turbo",
             streaming=True,  # Doesn't seem to work with agents
@@ -98,6 +99,8 @@ class MsgmateConversation(ABC):
             max_token_limit=buffer_memory_token_limit,
             memory_key="chat_history"
         )
+
+        memory.output_key = "output"
 
         memory.chat_memory.messages = messages_from_dict(memory_state)
 
@@ -138,12 +141,21 @@ class MsgmateConversation(ABC):
             cb.on_tool_start = self.on_tool_start
             cb.on_tool_end = self.on_tool_end
 
-            output = self.agent_chain(inputs=[input])
+            try:
+                output = self.agent_chain(inputs=[input])
+                # we want to forward parse erros cause sometimes this just means the ai is asking for more input
+            except OutputParserException as e:
+                print("Parse output exception", str(e))
+                output = str(e)
 
+            # some even more fine grained token usage tracking would be cool
             self.token_usages.append({
                 "total_tokens": cb.total_tokens,
                 "completion_tokens": cb.completion_tokens,
                 "prompt_tokens": cb.prompt_tokens,
                 "cost_estimate": cb.total_cost
             })
-        return output
+
+            message_state = messages_to_dict(
+                self.agent_chain.memory.chat_memory.messages)
+        return output, message_state, self.token_usages

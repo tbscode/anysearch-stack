@@ -3,6 +3,7 @@ from googletrans import Translator
 from googletrans.constants import LANGUAGES
 from django.utils.translation import pgettext_lazy
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+import concurrent.futures
 import base64
 from uuid import uuid4
 import random
@@ -138,14 +139,24 @@ class Project(models.Model):
 LANG_TO_SLUG = {y: x for x, y in LANGUAGES.items()}
 
 
-def translate_to_all_langs_in_list(text, lang_list, source_lang):
+def translate_text(text, source_lang, dest_lang):
     translator = Translator()
-    data = {}
+    translation = translator.translate(text, src=source_lang, dest=dest_lang)
+    return dest_lang, translation.text
 
-    for lang in lang_list:
-        tranlation = translator.translate(
-            text, src=LANG_TO_SLUG[source_lang], dest=LANG_TO_SLUG[lang])
-        data[lang] = tranlation.text
+
+def translate_to_all_langs_in_list(text, lang_list, source_lang):
+    data = {}
+    source_lang_slug = LANG_TO_SLUG[source_lang]
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(
+            translate_text, text, source_lang_slug, LANG_TO_SLUG[lang]) for lang in lang_list]
+
+        for future in concurrent.futures.as_completed(futures):
+            lang, translation = future.result()
+            data[LANGUAGES[lang]] = translation
+            print("GOT", translation)
 
     return data
 
