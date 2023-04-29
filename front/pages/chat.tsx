@@ -290,12 +290,13 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
         <p className="text-softwhite font-medium text-xl">You</p>
         <img
           className="w-24 rounded-full"
-          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images"
+          src={state.data.profile_image}
         />
         <p className="text-softwhite font-medium text text-xl">Designer Team</p>
         <p className="text-grayout text-xs">8 Members</p>
         <div className="flex flex-col gap-2">
           Actions
+          Your language: {state.data.language}
           <div className="dropdown dropdown-end">
           <button className="btn gap-2">
             <svg
