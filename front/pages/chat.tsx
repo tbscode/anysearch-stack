@@ -80,7 +80,8 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
         const newState = JSON.parse(JSON.stringify(state));
 
         // TODO don't use current project but deteermine it by project hash!
-        if (data.hash === state.data.hash) {
+        console.log("OWN USER", data.sender, state.data.hash)
+        if (data.sender === state.data.hash) {
           newState.data.projects[curProject].messages.map((message) => {
             if(message.hash === "temp"){
               return data
@@ -173,7 +174,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
                 className=" input w-full  bg-softwhite outline-none"
               />
               {inputValue && (
-                <p>Results for "{inputValue}"</p>
+                <p>Results for &apos;{inputValue}&apos;</p>
               )}
             </div>
             {filteredProjects.length > 0 ? (
