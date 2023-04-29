@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import pgettext_lazy
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 import base64
 from uuid import uuid4
 
@@ -58,7 +58,7 @@ class LanguageChoices(models.TextChoices):
     SWAHILI = "swahili", pgettext_lazy("profile.lang.swahili", "Swahili")
 
 
-class UserManager(models.Manager):
+class UserManager(BaseUserManager):
     def create(self, **kwargs):
         user = self.model(
             profile=UserProfile.objects.create(),
