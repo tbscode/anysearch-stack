@@ -60,7 +60,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
   const [onlineChatId, setOnlineChatId] = useState(0);
   const [inputState, setInputState] = useState("")
   const [curProject, setCurProject] = useState(0)
-  const [selectedLanguage, setSelectedLanguage] = useState("dutch")
+  const [selectedLanguage, setSelectedLanguage] = useState(!state.data ? 'english': state.data.language)
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
   
@@ -133,7 +133,8 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
           hash: "temp",
           text: text,
           data: {[selectedLanguage]: text},
-          sender: state.data.hash
+          sender: state.data.hash,
+          profile_image: state.data.profile_image,
         })
         setState(newState) 
 
@@ -180,11 +181,13 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
             {filteredProjects.length > 0 ? (
               <ul className="menu p-2 w-80 text-base-content">
                 {filteredProjects.map((project, index) => (
-                  <li key={project.project_hash}>
+                  <li key={project.project_hash} onClick={(e) => {
+                    setCurProject(index)
+                  }}>
                     <div>
                       <div className="avatar">
                         <div className="w-14 rounded-2xl">
-                          <img src="/group.png" />
+                          <img src="/_nstat/group.png" />
                         </div>
                       </div>
                       <div>
@@ -223,7 +226,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
         <div className="flex min-h-fit gap-4 items-center m-4">
           <div className="avatar">
             <div className="w-14 rounded-2xl">
-              <img src="/group.png" />
+              <img src="/_nstat/group.png" />
             </div>
           </div>
           <div>
@@ -253,7 +256,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
     <div className={`chat ${chatClass}`} key={message.hash}>
       <div className="chat-image avatar">
         <div className={`w-12 mt-2 rounded-xl ${chatDirection}`}>
-          <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
+          <img src={message.profile_image} />
         </div>
       </div>
       <div className="chat-bubble bg-softwhite">
