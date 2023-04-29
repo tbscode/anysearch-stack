@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import sys
 BASE_ADMIN_USERNAME = os.environ.get("BASE_ADMIN_USERNAME", "admin")
 BASE_ADMIN_USER_PASSWORD = os.environ.get(
@@ -6,6 +7,7 @@ BASE_ADMIN_USER_PASSWORD = os.environ.get(
 DEBUG = True
 IGNORABLE_404_URLS = [r'^favicon\.ico$']
 ROOT_URLCONF = 'conf.urls'
+BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 INSTALLED_APPS = [
     'core',
@@ -37,6 +39,22 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "db.sqlite3",
+    }
+}
+
+DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
+DATABASES = {
+    'default': {
+        'ENGINE': DB_ENGINE,
+        'NAME': BASE_DIR / 'db.sqlite3',
+        **({
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ['DB_PORT'],
+            'OPTIONS': {'sslmode': 'require'}
+        } if 'postgresql' in os.environ.get("DB_ENGINE", "") else {})
     }
 }
 REST_FRAMEWORK = {
