@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+from core.api.handle_message import handle_socket_message
 from asgiref.sync import sync_to_async
 
 
@@ -12,7 +13,7 @@ def get_user_prodjects(user, connect_user_to_project=True):
             # add the user as connecte to the project
             project.users_connected.add(user)
             project.save()
-        project_hashes.append(project.hash)
+        project_hashes.append(str(project.hash))
     return project_hashes
 
 
@@ -26,7 +27,8 @@ def get_connected_users_per_project(user):
     data = {}
 
     for project in user.projects.all():
-        data[project.hash] = [user.hash for user in project.users_connected.all()]
+        data[str(project.hash)] = [str(user.hash)
+                                   for user in project.users_connected.all()]
     return data
 
 
@@ -53,7 +55,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             for project in projects:
                 project_group_slug = f"project-{project}"
                 await self.channel_layer.group_add(project_group_slug, self.channel_name)
-                await self.channel_layer.group_send()
 
                 # Now we notify all channels that that user went online!
                 await self.channel_layer.group_send(project_group_slug, {
@@ -61,7 +62,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "data": {
                         "event": "user_joined",
                         "user": {
-                            "hash": user.hash,
+                            "hash": str(user.hash),
                             "name": user.first_name
                         }
                     }
@@ -71,7 +72,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # then we also thell him which user is connected to which channel
             await self.send(text_data=json.dumps({
                 "event": "user_connected",
-                "channel": user.hash,
+                "channel": str(user.hash),
                 "projects": connected_usrs_per_project
             }))
 
@@ -87,6 +88,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 # as convention 'data' should always contain a 'event'
                 **event['data'],
             }))
+
+    async def receive(self, text_data):
+        if self.scope["user"].is_anonymous:
+            # only allow already authenticated users
+            await self.close()
+        else:
+            print("RECEIVED MESSAGE", text_data)
+            data = await sync_to_async(json.loads)(text_data)
+            resp = await sync_to_async(handle_socket_message)(data, self.scope["user"])
 
     async def disconnect(self, close_code):
 
@@ -107,7 +117,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "data": {
                         "event": "user_left",
                         "user": {
-                            "hash": user.hash,
+                            "hash": str(user.hash),
                             "name": user.first_name
                         }
                     }

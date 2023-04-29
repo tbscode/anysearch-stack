@@ -157,7 +157,7 @@ class ChatMessage(models.Model):
 
     time = models.DateTimeField(auto_now_add=True)
     original_message = models.TextField()
-    data = models.JSONField()
+    data = models.JSONField(default=dict)
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True, related_name='message_user')
 
