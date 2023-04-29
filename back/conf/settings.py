@@ -4,7 +4,7 @@ import sys
 BASE_ADMIN_USERNAME = os.environ.get("BASE_ADMIN_USERNAME", "admin")
 BASE_ADMIN_USER_PASSWORD = os.environ.get(
     "BASE_ADMIN_USER_PASSWORD", "password")
-DEBUG = os.environ["DJANGO_DEBUG"].lower() in ('true', '1', 't')
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in ('true', '1', 't')
 IGNORABLE_404_URLS = [r'^favicon\.ico$']
 ROOT_URLCONF = 'conf.urls'
 BASE_DIR = Path(__file__).resolve().parent.parent
