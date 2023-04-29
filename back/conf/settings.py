@@ -1,6 +1,8 @@
 import os
 import sys
-
+BASE_ADMIN_USERNAME = os.environ.get("BASE_ADMIN_USERNAME", "admin")
+BASE_ADMIN_USER_PASSWORD = os.environ.get(
+    "BASE_ADMIN_USER_PASSWORD", "password")
 DEBUG = True
 IGNORABLE_404_URLS = [r'^favicon\.ico$']
 ROOT_URLCONF = 'conf.urls'
@@ -34,6 +36,16 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "db.sqlite3",
+    }
+}
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '1000/day',
+        'user': '2000/day'
     }
 }
 
