@@ -141,15 +141,18 @@ def handle_socket_message(data, user):
             else:
                 message_state.append(as_message(
                     message.original_message, "human"))
+        project_langs = get_langs_in_project(project)
 
         agent = DBChatAgent(
             ai_user=ai_user_for_project, project=project,
             send_message_func=send_message,
+            user_lang=str(user.profile.language),
             memory_state=message_state,
             model="gpt-3.5-turbo",
             open_ai_api_key=settings.OPENAI_KEY,
             buffer_memory_token_limit=500,
             verbose=True,
+            lang_list=project_langs,
             tools=[
                 ToolGSearch(
                     google_api_key=settings.GOOGLE_API_KEY,
@@ -169,8 +172,8 @@ def handle_socket_message(data, user):
             project=project,
             original_message=out,
             sender=ai_user_for_project,
-            data=translate_to_all_langs_in_list(out, get_langs_in_project(
-                project), str(project.base_language)),
+            data=translate_to_all_langs_in_list(
+                out, project_langs, str(project.base_language)),
         )
 
         send_message(msg)

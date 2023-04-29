@@ -67,7 +67,7 @@ def create_simple_user_setup():
     print("L1", languages_p1)
     print("L2", languages_p2)
 
-    for i in range(50):
+    for i in range(20):
         random_user = users[i % project_cutoff]
         message = f"Hello, this is a test message {i}"
         data = translate_to_all_langs_in_list(
