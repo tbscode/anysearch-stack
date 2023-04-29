@@ -31,7 +31,6 @@ class LanguageChoices(models.TextChoices):
         "profile.lang.norwegian", "Norwegian")
     FINNISH = "finnish", pgettext_lazy("profile.lang.finnish", "Finnish")
     GREEK = "greek", pgettext_lazy("profile.lang.greek", "Greek")
-    CZECH = "czech", pgettext_lazy("profile.lang.czech", "Czech")
     HUNGARIAN = "hungarian", pgettext_lazy(
         "profile.lang.hungarian", "Hungarian")
     ROMANIAN = "romanian", pgettext_lazy(
@@ -40,22 +39,12 @@ class LanguageChoices(models.TextChoices):
         "profile.lang.indonesian", "Indonesian")
     HEBREW = "hebrew", pgettext_lazy("profile.lang.hebrew", "Hebrew")
     THAI = "thai", pgettext_lazy("profile.lang.thai", "Thai")
-    VIETNAMESE = "vietnamese", pgettext_lazy(
-        "profile.lang.vietnamese", "Vietnamese")
     UKRAINIAN = "ukrainian", pgettext_lazy(
         "profile.lang.ukrainian", "Ukrainian")
-    SLOVAK = "slovak", pgettext_lazy("profile.lang.slovak", "Slovak")
-    CROATIAN = "croatian", pgettext_lazy(
-        "profile.lang.croatian", "Croatian")
     SERBIAN = "serbian", pgettext_lazy("profile.lang.serbian", "Serbian")
-    BULGARIAN = "bulgarian", pgettext_lazy(
-        "profile.lang.bulgarian", "Bulgarian")
-    LITHUANIAN = "lithuanian", pgettext_lazy(
-        "profile.lang.lithuanian", "Lithuanian")
     LATVIAN = "latvian", pgettext_lazy("profile.lang.latvian", "Latvian")
     ESTONIAN = "estonian", pgettext_lazy(
         "profile.lang.estonian", "Estonian")
-    PERSIAN = "persian", pgettext_lazy("profile.lang.persian", "Persian")
     AFRIKAANS = "afrikaans", pgettext_lazy(
         "profile.lang.afrikaans", "Afrikaans")
     SWAHILI = "swahili", pgettext_lazy("profile.lang.swahili", "Swahili")
@@ -106,6 +95,7 @@ class User(AbstractUser):
 class UserProfile(models.Model):
     first_name = models.CharField(max_length=50)
     second_name = models.CharField(max_length=50)
+    image = models.TextField(null=True, blank=True)
     language = models.CharField(
         max_length=50, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
 
