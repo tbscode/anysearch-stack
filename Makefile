@@ -85,8 +85,10 @@ helm_dry_install:
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --dry-run
 	
 helm_install:
-	helm dependency build
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir)
+
+helm_install_prod:
+	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --values ./helm-chart/production-values.yaml
 
 helm_uninstall:
 	microk8s helm uninstall $(helm_installation_name)
