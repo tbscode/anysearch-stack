@@ -226,7 +226,10 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
         <div className="flex min-h-fit gap-4 items-center m-4">
           <div className="avatar">
             <div className="w-14 relative overflow-visible">
+            {connectionStatus === "Connected" ?
               <span className="absolute top-0 right-0 border-background border-solid border-2 inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+              : null
+            }
               <img className="rounded-2xl" src="/_nstat/group.png" />
             </div>
           </div>
