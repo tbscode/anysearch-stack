@@ -43,6 +43,10 @@ export default function Index({ state, updateTheme }): JSX.Element {
   const loginRequest = () => {
     fetch('/api/login', {
       method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookiesAsObject().csrftoken,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(loginData)
     }).then((res) => {
       res.json().then((data) => {
@@ -52,7 +56,9 @@ export default function Index({ state, updateTheme }): JSX.Element {
   }
   //hello alter
   return (<div>
-      <button className="btn">
+      <button className="btn" onClick={() => {
+        loginRequest();
+      }}>
         This is a trashy placeholder for a real login api
       </button>
       <input type="text" placeholder="username" onChange={(e) => {setLoginData({...loginData, username: e.target.value})}} className="input input-bordered input-sm w-full max-w-xs" />
