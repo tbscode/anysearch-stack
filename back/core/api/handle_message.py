@@ -13,7 +13,7 @@ from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
 from rest_framework import serializers
-from core.models import Project, ChatMessage
+from core.models import Project, ChatMessage, translate_to_all_langs_in_list, get_langs_in_project
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 from core.api.user_data import serialize_message
@@ -75,11 +75,14 @@ def handle_socket_message(data, user):
 
     # translate the message in all languages that are used in that project
     # TODO ... which api to use again ?
+    translated_message = translate_to_all_langs_in_list(
+        data.text, get_langs_in_project(project), str(project.base_language))
 
     message = ChatMessage.objects.create(
         project=project,
         original_message=data.text,
         sender=user,
+        data=translated_message,
         **extra_params
     )
 
