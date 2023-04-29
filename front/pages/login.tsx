@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import { useRouter } from 'next/router';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { Children, useEffect, useState, useCallback } from 'react';
 
@@ -34,6 +35,7 @@ export const getServerSideProps = async ({ req }: { req: any }) => {
 };
 
 export default function Index({ state, updateTheme }): JSX.Element {
+  const router = useRouter();
 
   const [loginData, setLoginData] = useState({
     username: '',
@@ -49,9 +51,9 @@ export default function Index({ state, updateTheme }): JSX.Element {
       },
       body: JSON.stringify(loginData)
     }).then((res) => {
-      res.json().then((data) => {
-        console.log(data);
-      })
+      if(res.ok){
+        window.location.href = "/chat";
+      }
     })
   }
   //hello alter
