@@ -6,9 +6,9 @@ backend_pod_name := backend-deployment
 helm_installation_name := tiny-django
 
 backend_migrate_static:
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py makemigrations
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py migrate
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py collectstatic --noinput
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py makemigrations
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py migrate
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py collectstatic --noinput
 
 backend_build:
 	docker build -t localhost:32000/backend-image:latest -f Dockerfile.back_dev back
