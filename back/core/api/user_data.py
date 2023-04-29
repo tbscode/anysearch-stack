@@ -61,6 +61,6 @@ def get_user_data(user):
 )
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication])
-def user_data(request):
+def request_user_data(request):
 
     return Response(get_user_data(request.user), status=status.HTTP_200_OK)
