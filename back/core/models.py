@@ -13,6 +13,13 @@ class UserManager(models.Manager):
         )
         user.save(using=self._db)
 
+    def create_superuser(self, number, password, **kwargs):
+        kwargs["is_staff"] = True
+        kwargs["is_superuser"] = True
+
+        user = self.create(number=number, password=password, **kwargs)
+        return user
+
 
 class User(AbstractUser):
     show_second_name = models.BooleanField(default=False)
