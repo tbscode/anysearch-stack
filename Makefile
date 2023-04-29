@@ -1,7 +1,7 @@
 root_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 backend_img_sha := $(shell docker images -q localhost:32000/backend-image:latest)
 frontend_img_sha := $(shell docker images -q localhost:32000/frontend-image:latest)
-kubernetes_namespace := tiny-django
+kubernetes_namespace := anysearch
 backend_pod_name := backend-deployment
 helm_installation_name := tiny-django
 
