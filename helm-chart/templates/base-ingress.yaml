@@ -37,6 +37,21 @@ spec:
     - http:
     {{- end }}
         paths:
+          # nextjs's public folder also directly routes to frontend manager
+          - path: /_next/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.frontend.serviceName }}
+                port:
+                  number: {{ .Values.frontend.port }}
+          - path: /_nstat/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.frontend.serviceName }}
+                port:
+                  number: {{ .Values.frontend.port }}
           - path: /
             pathType: Prefix
             backend:
