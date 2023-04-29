@@ -9,7 +9,7 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
-from core.models import Project, ChatMessage, User
+from core.models import Project, ChatMessage, User, ChatMessage
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 
@@ -27,6 +27,23 @@ def get_project_participants(project):
     return data
 
 
+def get_project_messages(project):
+    messages = ChatMessage.objects.filter(project=project).order_by('time')
+    data = []
+    for message in messages:
+        attachment = None
+        if message.file_attachment:
+            attachment = message.get_attachment_b64()
+        data.append({
+            "time": message.time,
+            "data": message.data,
+            "sender": message.sender.hash,
+            "hash": message.hash,
+            "attachment": attachment,
+        })
+    return data
+
+
 def get_user_projects(user):
     projects = user.projects.all()
     data = []
@@ -36,6 +53,7 @@ def get_user_projects(user):
             "name": project.name,
             "description": project.description,
             "participants": get_project_participants(project),
+            "messages": get_project_messages(project),
         })
     return projects
 
