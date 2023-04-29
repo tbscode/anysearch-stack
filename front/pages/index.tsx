@@ -1,5 +1,8 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { Children, useEffect, useState, useCallback } from 'react';
+
 
 
 export const getCookiesAsObject = () => {
@@ -33,6 +36,31 @@ export const getServerSideProps = async ({req} : {req: any}) => {
 export default function Index({ state, updateTheme }): JSX.Element {
   //hello alter
   console.log("STATE", state);
+  
+  const [socketUrl, setSocketUrl] = useState(process.env.NEXT_PUBLIC_WS_PATH);
+  const [messageHistory, setMessageHistory] = useState([]);
+  const [onlineChatId, setOnlineChatId] = useState(0);
+
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      setMessageHistory((prev) => prev.concat(lastMessage));
+      const data = JSON.parse(lastMessage.data);
+      /**
+       * Here we can process any incoming websocket calls
+       */
+    }
+  }, [lastMessage, setMessageHistory]);
+
+  
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Connected',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Offline',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
 
   return (<h1><button className="btn">Hello daisyUI</button></h1>);
 }
