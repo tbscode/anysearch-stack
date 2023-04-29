@@ -15,31 +15,6 @@ from asgiref.sync import sync_to_async, async_to_sync
 
 
 @dataclass
-class Person:
-    username: str
-    password: str
-    password_confirm: str
-
-
-class RegisterSerializer(DataclassSerializer):
-    class Meta:
-        dataclass = Person
-
-
-@extend_schema(
-    request=RegisterSerializer(many=False),
-    auth=None,
-)
-@throttle_classes([AnonRateThrottle])
-@api_view(['POST'])
-def register_user(request):
-    serializer = RegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    # TODO: yet to be finished
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@dataclass
 class MessageRequest:
     project_hash: str
     type: Literal["message", "typing", "seen"]
