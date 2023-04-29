@@ -242,7 +242,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
           id="chatInner"
           className="w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end h-full overflow-scroll"
         >
-          <div className="h-80 overflow-scroll scroll-bottom" ref={scrollRef}>
+          <div className="h-full overflow-scroll scroll-bottom" ref={scrollRef}>
 {state.data.projects[curProject].messages.map((message) => {
   const isSender = message.sender === state.data.hash;
   const chatClass = isSender ? "chat-end" : "chat-start";
