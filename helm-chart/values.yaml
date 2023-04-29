@@ -1,5 +1,5 @@
 useCertManager: false
-rootNamespace: tiny-django
+rootNamespace: anychat
 baseAppUrl: localhost
 registryAuthRequired: false
 production: false
