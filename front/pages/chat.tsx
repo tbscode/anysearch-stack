@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
+import { useEffect, useRef, useState } from "react";
 
 export const getCookiesAsObject = () => {
   // stolen: https://stackoverflow.com/a/64472572
@@ -31,6 +32,19 @@ export const getServerSideProps = async ({ req }: { req: any }) => {
 
 export default function Index({ state, updateTheme }): JSX.Element {
   console.log("STATE", state);
+  const scrollRef = useRef(null);
+
+  const [inputValue, setInputValue] = useState('');
+
+  function handleInputChange(event) {
+    setInputValue(event.target.value);
+  }
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, []);
 
   return (
     <main className="flex bg-background max-h-screen overflow-hidden">
@@ -57,8 +71,11 @@ export default function Index({ state, updateTheme }): JSX.Element {
             <input
               type="text"
               placeholder="Search..."
+              value={inputValue}
+              onChange={handleInputChange}
               className="m-auto input w-11/12 bg-softwhite outline-none"
             />
+            <p>{inputValue}</p>
             <ul className="menu p-2 w-80 text-base-content">
               {[...Array(10)].map((_, index) => (
                 <li key={index}>
@@ -89,26 +106,26 @@ export default function Index({ state, updateTheme }): JSX.Element {
 
       <section
         id="chat"
-        className="w-full px-2 flex flex-col justify-end"
+        className="w-full px-2 flex flex-col"
       >
-        <div className="flex gap-4 items-center m-4">
+        <div className="flex min-h-fit gap-4 items-center m-4">
           <div className="avatar">
             <div className="w-14 rounded-2xl">
               <img src="/group.png" />
             </div>
           </div>
           <div>
-            <p className="text-softwhite font-medium text text-sm">
-              Designer Team
-            </p>
+            <p className="text-softwhite font-medium text text-sm">Designer Team</p>
             <p className="text-grayout text-xs">8 Members</p>
           </div>
+          <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">+ Invite Member</button>
         </div>
         <section
           id="chatInner"
-          className="bg-darkground h-full w-full p-8 rounded-t-xl flex flex-col justify-end"
+          className="h-full w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end"
         >
-          {[...Array(2)].map((_, index) => (
+          <div className="h-full overflow-scroll scroll-bottom" ref={scrollRef}>
+          {[...Array(200)].map((_, index) => (
             <div className="chat chat-start" key={index}>
               <div className="chat-image avatar">
                 <div className="w-12 mt-2 mr-2 rounded-xl">
@@ -132,6 +149,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
               </div>
             </div>
           ))}
+          </div>
 
           <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4">
             <input
