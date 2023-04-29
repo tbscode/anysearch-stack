@@ -1,6 +1,9 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 
+import { testData } from '../components/testData'
+
+
 export const getCookiesAsObject = () => {
   // stolen: https://stackoverflow.com/a/64472572
   return Object.fromEntries(
