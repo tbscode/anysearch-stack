@@ -31,7 +31,7 @@ class RequestReportSerializer(DataclassSerializer):
 )
 @throttle_classes([SessionAuthentication])
 @api_view(['POST'])
-def login_user(request):
+def request_report(request):
     serializer = RequestReportSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
