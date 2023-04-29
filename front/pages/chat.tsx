@@ -56,7 +56,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
             <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
             <ul className="menu p-4 w-80 text-base-content">
             {[...Array(10)].map((_, index) => (
-                <li>
+                <li key={index}>
                     <div>
                     <div className="avatar">
                         <div className="w-16 rounded-2xl">
@@ -78,7 +78,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
       <section id="chat" className="bg-darkground w-full p-8 rounded-t-lg flex flex-col justify-end">
 
         {[...Array(2)].map((_, index) => (
-        <div className="chat chat-start">
+        <div key={index} className="chat chat-start">
           <div className="chat-image avatar">
             <div className="w-10 rounded-full">
               <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
@@ -90,7 +90,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
         </div>
         ))}
         {[...Array(2)].map((_, index) => (
-        <div className="chat chat-end">
+        <div className="chat chat-end" key={index}>
           <div className="chat-image avatar">
             <div className="w-10 rounded-full">
               <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
