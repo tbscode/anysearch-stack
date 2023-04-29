@@ -47,6 +47,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
     if (lastMessage !== null) {
       setMessageHistory((prev) => prev.concat(lastMessage));
       const data = JSON.parse(lastMessage.data);
+      console.log("message receiveed", data);
       /**
        * Here we can process any incoming websocket calls
        */
@@ -62,5 +63,19 @@ export default function Index({ state, updateTheme }): JSX.Element {
     [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
   }[readyState];
 
-  return (<h1><button className="btn">Hello daisyUI</button></h1>);
+  return (<h1>
+    <button className="btn">Hello daisyUI</button>
+    <button className="btn">{connectionStatus}</button>
+    <input type="text" placeholder="Type here" className="input w-full max-w-xs" />
+    <button className="btn" onClick={() => {
+          sendMessage(
+            JSON.stringify({
+              type: 'new_message',
+              text: 'TestMessage',
+              project_hash: 'f8f65557-e7dc-43c5-bcf1-3bd557c2d324',
+              data: {}
+            })
+          );
+    }}>Send test message</button>
+    </h1>);
 }

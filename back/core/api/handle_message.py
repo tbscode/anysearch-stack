@@ -10,6 +10,7 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
+from rest_framework import serializers
 from core.models import Project, ChatMessage
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
@@ -22,10 +23,12 @@ class MessageRequest:
     type: Literal["new_message", "typing", "seen"]
     text: Optional[str]
     data: Optional[Dict]
-    file_attachment: Optional[str]
+    file_attachment: Optional[str] = None
 
 
 class MessageRequestSerializer(DataclassSerializer):
+    file_attachment = serializers.CharField(required=False)
+
     class Meta:
         dataclass = MessageRequest
 
@@ -83,10 +86,10 @@ def handle_socket_message(data, user):
     async_to_sync(channel_layer.group_send)(project_group_slug, {
         "type": "broadcast_message",
         "data": {
-            "event": data.event,
+            "event": data.type,
             **serialize_message(message),
             "user": {
-                "hash": user.hash,
+                "hash": str(user.hash),
                 "name": user.first_name
             }
         }
@@ -94,6 +97,6 @@ def handle_socket_message(data, user):
 
     # Now check if the message requres additional actions
     # if it starts with `@ai` an AI assistant should reply
-    if data.test.startswith("@ai"):
+    if data.text.startswith("@ai"):
         # TODO ....
         pass
