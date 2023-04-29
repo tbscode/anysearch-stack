@@ -52,7 +52,7 @@ OPENAI_KEY = os.environ.get(
 
 
 CSRF_TRUSTED_ORIGINS = ["https://t1m.me",
-                        "https://anysearch.t1m.me", "https://anychat.t1m.me/"]
+                        "https://anysearch.t1m.me", "https://anychat.t1m.me"]
 
 DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
 DATABASES = {
