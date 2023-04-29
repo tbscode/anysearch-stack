@@ -1,5 +1,5 @@
 {{- if .Values.useCertManager }}
-apiVersion: certmanager.io/v1
+apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: {{ .Values.certmanager.name }}
