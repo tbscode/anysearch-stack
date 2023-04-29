@@ -174,7 +174,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
                 className=" input w-full  bg-softwhite outline-none"
               />
               {inputValue && (
-                <p>Results for "{inputValue}"</p>
+                <p>Results for &apos;{inputValue}&apos;</p>
               )}
             </div>
             {filteredProjects.length > 0 ? (
