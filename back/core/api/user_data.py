@@ -36,6 +36,7 @@ def serialize_message(message):
         "text": message.original_message,
         "sender": str(message.sender.hash),
         "hash": str(message.hash),
+        "profile_image": message.sender.profile.image,
         "attachment": attachment,
     }
 
@@ -72,6 +73,7 @@ def get_user_data(user):
     return {
         "hash": str(user.hash),
         "email": user.email,
+        "profile_image": user.profile.image,
         "first_name": user.profile.first_name,
         "language": user.profile.language,
         "projects": get_user_projects(user),
