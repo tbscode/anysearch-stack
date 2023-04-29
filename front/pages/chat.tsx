@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import { testData } from "../components/testData";
 
-console.log(testData.projects);
+console.log(testData.hash);
 
 export const getCookiesAsObject = () => {
   // stolen: https://stackoverflow.com/a/64472572
@@ -37,7 +37,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
   console.log("STATE", state);
   const scrollRef = useRef(null);
 
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
 
   function handleInputChange(event) {
     setInputValue(event.target.value);
@@ -50,20 +50,20 @@ export default function Index({ state, updateTheme }): JSX.Element {
   }, []);
 
   const filteredProjects = testData.projects.filter((project) =>
-  project.name.toLowerCase().includes(inputValue.toLowerCase())
-);
+    project.name.toLowerCase().includes(inputValue.toLowerCase())
+  );
 
   return (
     <main className="flex bg-background max-h-screen overflow-hidden">
-      <nav>
-        <select className="select select-ghost w-full max-w-xs">
+      <nav className="flex flex-col">
+        <select className="mx-auto w-11/12 select select-ghost">
           <option selected>All Chats</option>
           <option>Contacts</option>
           <option>Groups</option>
           <option>Assistants</option>
         </select>
 
-        <div className="drawer drawer-mobile">
+        <div className="drawer drawer-mobile flex h-full">
           <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
           <div className="drawer-content flex flex-col items-center justify-center">
             {/* <label
@@ -73,16 +73,20 @@ export default function Index({ state, updateTheme }): JSX.Element {
               Open drawer
             </label> */}
           </div>
-          <div className="drawer-side">
+          <div className="flex flex-col">
             {/* <label htmlFor="my-drawer-2" className="drawer-overlay"></label> */}
-            <input
-              type="text"
-              placeholder="Search..."
-              value={inputValue}
-              onChange={handleInputChange}
-              className="m-auto input w-11/12 bg-softwhite outline-none"
-            />
-            <p>{inputValue}</p>
+            <div className=" mx-auto w-11/12 w-max-w-11/12">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={inputValue}
+                onChange={handleInputChange}
+                className=" input w-full  bg-softwhite outline-none"
+              />
+              {inputValue && (
+                <p>Results for "{inputValue}"</p>
+              )}
+            </div>
             {filteredProjects.length > 0 ? (
               <ul className="menu p-2 w-80 text-base-content">
                 {filteredProjects.map((project, index) => (
@@ -147,30 +151,24 @@ export default function Index({ state, updateTheme }): JSX.Element {
           className="h-full w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end"
         >
           <div className="h-full overflow-scroll scroll-bottom" ref={scrollRef}>
-            {[...Array(200)].map((_, index) => (
-              <div className="chat chat-start" key={index}>
-                <div className="chat-image avatar">
-                  <div className="w-12 mt-2 mr-2 rounded-xl">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
-                  </div>
-                </div>
-                <div className="chat-bubble bg-softwhite">
-                  It was you who would bring balance to the Force
-                </div>
-              </div>
-            ))}
-            {[...Array(2)].map((_, index) => (
-              <div className="chat chat-end" key={index}>
-                <div className="chat-image avatar">
-                  <div className="w-12 mt-2 ml-2 rounded-xl">
-                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
-                  </div>
-                </div>
-                <div className="chat-bubble bg-softwhite">
-                  It was you who would bring balance to the Force
-                </div>
-              </div>
-            ))}
+{testData.projects[0].messages.map((message) => {
+  const isSender = message.sender === testData.hash;
+  const chatClass = isSender ? "chat-end" : "chat-start";
+  const chatDirection = isSender ? "ml-2" : "mr-2";
+
+  return (
+    <div className={`chat ${chatClass}`} key={message.hash}>
+      <div className="chat-image avatar">
+        <div className={`w-12 mt-2 rounded-xl ${chatDirection}`}>
+          <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Frevgineer.com%2Fwp-content%2Fuploads%2F2019%2F12%2FThisPersonDoesNotExist_fail2-768x811.jpg&f=1&nofb=1&ipt=b88a3d792b206b14cb27c58ef847d473ce09ec6a69ffc6b6db5c280bf0ea12dd&ipo=images" />
+        </div>
+      </div>
+      <div className="chat-bubble bg-softwhite">
+        {message.data.dutch}
+      </div>
+    </div>
+  );
+})}
           </div>
 
           <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4">
