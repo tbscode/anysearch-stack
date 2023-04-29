@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import pgettext_lazy
 from django.contrib.auth.models import AbstractUser
+import base64
 from uuid import uuid4
 
 
@@ -124,9 +125,22 @@ class ChatMessage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE,
                                 null=True, blank=True, related_name='project_messages')
 
+    time = models.DateTimeField(auto_now_add=True)
     original_message = models.TextField()
     data = models.JSONField()
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True, related_name='message_user')
 
     hash = models.UUIDField(default=uuid4, editable=False, unique=True)
+
+    file_attachment = models.BinaryField(blank=True, null=True)
+
+    def get_attachment_b64(self):
+        """
+        TODO: we will not setup full media file handling for this simple project, ultimatily this should also be changed 
+        For simplicicy we just use Binary database field for now and endode this as b64 string to be send to the frontend
+        In the frontend you can reconstruct the file with something along the lines of:
+        var file = dataURLtoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=','hello.txt');
+        console.log(file);
+        """
+        return base64.b64encode(self.file_attachment).decode('utf-8')
