@@ -18,3 +18,4 @@ uvicorn[standard]
 pdfkit
 mistune
 whitenoise
+googletrans==3.1.0a0

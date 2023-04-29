@@ -9,7 +9,7 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.contrib.auth import authenticate, login
-from core.models import Project, ChatMessage, User, ChatMessage
+from core.models import Project, ChatMessage, User, ChatMessage, get_langs_in_project
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 
@@ -18,10 +18,9 @@ def get_project_participants(project):
     data = []
     for participant in project.participants.all():
         data.append({
-            "hash": participant.hash,
+            "hash": str(participant.hash),
             "email": participant.email,
             "first_name": participant.profile.first_name,
-            "last_name": participant.profile.last_name,
             "language": participant.profile.language,
         })
     return data
@@ -32,10 +31,10 @@ def serialize_message(message):
     if message.file_attachment:
         attachment = message.get_attachment_b64()
     return {
-        "time": message.time,
+        "time": str(message.time),
         "data": message.data,
-        "sender": message.sender.hash,
-        "hash": message.hash,
+        "sender": str(message.sender.hash),
+        "hash": str(message.hash),
         "attachment": attachment,
     }
 
@@ -53,13 +52,14 @@ def get_user_projects(user):
     data = []
     for project in projects:
         data.append({
-            "project_hash": project.hash,
+            "project_hash": str(project.hash),
             "name": project.name,
             "description": project.description,
             "participants": get_project_participants(project),
             "messages": get_project_messages(project),
+            "languages": get_langs_in_project(project),
         })
-    return projects
+    return data
 
 
 def get_user_data(user):
@@ -69,10 +69,9 @@ def get_user_data(user):
     """
 
     return {
-        "hash": user.hash,
+        "hash": str(user.hash),
         "email": user.email,
         "first_name": user.profile.first_name,
-        "last_name": user.profile.last_name,
         "language": user.profile.language,
         "projects": get_user_projects(user),
     }

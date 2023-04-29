@@ -1,8 +1,11 @@
 from django.db import models
+from googletrans import Translator
+from googletrans.constants import LANGUAGES
 from django.utils.translation import pgettext_lazy
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import base64
 from uuid import uuid4
+import random
 
 
 class LanguageChoices(models.TextChoices):
@@ -15,7 +18,6 @@ class LanguageChoices(models.TextChoices):
     PORTUGUESE = "portuguese", pgettext_lazy(
         "profile.lang.portuguese", "Portuguese")
     RUSSIAN = "russian", pgettext_lazy("profile.lang.russian", "Russian")
-    CHINESE = "chinese", pgettext_lazy("profile.lang.chinese", "Chinese")
     JAPANESE = "japanese", pgettext_lazy(
         "profile.lang.japanese", "Japanese")
     KOREAN = "korean", pgettext_lazy("profile.lang.korean", "Korean")
@@ -56,6 +58,11 @@ class LanguageChoices(models.TextChoices):
     AFRIKAANS = "afrikaans", pgettext_lazy(
         "profile.lang.afrikaans", "Afrikaans")
     SWAHILI = "swahili", pgettext_lazy("profile.lang.swahili", "Swahili")
+
+
+def get_random_language():
+    choices = [lang[0] for lang in LanguageChoices.choices]
+    return random.choice(choices)
 
 
 class UserManager(BaseUserManager):
@@ -111,6 +118,8 @@ class Project(models.Model):
     name = models.CharField(max_length=1000)
     description = models.TextField()
 
+    hash = models.UUIDField(default=uuid4, editable=False, unique=True)
+
     base_language = models.CharField(
         choices=LanguageChoices.choices,
         default=LanguageChoices.ENGLISH,
@@ -121,6 +130,25 @@ class Project(models.Model):
 
     users_connected = models.ManyToManyField(
         User, related_name='project_users_connected', null=True, blank=True)
+
+
+LANG_TO_SLUG = {y: x for x, y in LANGUAGES.items()}
+
+
+def translate_to_all_langs_in_list(text, lang_list, source_lang):
+    translator = Translator()
+    data = {}
+
+    for lang in lang_list:
+        tranlation = translator.translate(
+            text, src=LANG_TO_SLUG[source_lang], dest=LANG_TO_SLUG[lang])
+        data[lang] = tranlation.text
+
+    return data
+
+
+def get_langs_in_project(project):
+    return [str(project.base_language)] + [x.profile.language for x in project.participants.all()]
 
 
 class ChatMessage(models.Model):
