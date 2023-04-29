@@ -240,7 +240,7 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
         </div>
         <section
           id="chatInner"
-          className="h-full w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end"
+          className="w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end h-full overflow-scroll"
         >
           <div className="h-80 overflow-scroll scroll-bottom" ref={scrollRef}>
 {state.data.projects[curProject].messages.map((message) => {
