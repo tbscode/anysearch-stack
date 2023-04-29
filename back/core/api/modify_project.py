@@ -16,6 +16,7 @@ from asgiref.sync import sync_to_async, async_to_sync
 
 @dataclass
 class ProjectRequest:
+    project_hash: str
     name: str
     description: str
     participants = Optional[List[str]]
@@ -32,19 +33,23 @@ class ProjectRequestSerializer(DataclassSerializer):
 )
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication])
-def create_project(request):
+def modify_project(request):
     serializer = ProjectRequestSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     data = serializer.save()
 
-    project = Project.objects.create(
-        name=data.name,
-        description=data.description,
-    )
+    project = Project.objects.get(hash=data.project_hash)
+
+    if data.name:
+        project.name = data.name
+
+    if data.description:
+        project.description = data.description
+
     if data.participants:
         for hash in data.participants:
             user = User.objects.get(hash=hash)
             project.participants.add(user)
     project.save()
 
-    return Response({"hash": project.hash}, status=status.HTTP_201_CREATED)
+    return Response({"hash": project.hash}, status=status.HTTP_200_OK)
