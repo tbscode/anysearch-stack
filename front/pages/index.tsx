@@ -71,7 +71,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
           sendMessage(
             JSON.stringify({
               type: 'new_message',
-              text: 'TestMessage',
+              text: '@ai how are you?',
               project_hash: 'f8f65557-e7dc-43c5-bcf1-3bd557c2d324',
               data: {}
             })
