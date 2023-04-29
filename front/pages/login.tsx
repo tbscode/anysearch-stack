@@ -34,33 +34,34 @@ export const getServerSideProps = async ({req} : {req: any}) => {
 };
 
 export default function Index({ state, updateTheme }): JSX.Element {
+  
+  const [loginData, setLoginData] = useState({
+    username:'',
+    password:''
+  })
+  
+  const loginRequest = () => {
+    fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookiesAsObject().csrftoken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(loginData)
+    }).then((res) => {
+      res.json().then((data) => {
+        console.log(data);
+      })
+    })
+  }
   //hello alter
-  console.log("STATE", state);
-  
-  const [socketUrl, setSocketUrl] = useState(process.env.NEXT_PUBLIC_WS_PATH);
-  const [messageHistory, setMessageHistory] = useState([]);
-  const [onlineChatId, setOnlineChatId] = useState(0);
-
-  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
-
-  useEffect(() => {
-    if (lastMessage !== null) {
-      setMessageHistory((prev) => prev.concat(lastMessage));
-      const data = JSON.parse(lastMessage.data);
-      /**
-       * Here we can process any incoming websocket calls
-       */
-    }
-  }, [lastMessage, setMessageHistory]);
-
-  
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Connected',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Offline',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-  }[readyState];
-
-  return (<h1><button className="btn">Hello daisyUI</button></h1>);
+  return (<div>
+      <button className="btn" onClick={() => {
+        loginRequest();
+      }}>
+        This is a trashy placeholder for a real login api
+      </button>
+      <input type="text" placeholder="username" onChange={(e) => {setLoginData({...loginData, username: e.target.value})}} className="input input-bordered input-sm w-full max-w-xs" />
+      <input type="text" placeholder="password" onChange={(e) => {setLoginData({...loginData, password: e.target.value})}} className="input input-bordered input-sm w-full max-w-xs" />
+    </div>);
 }

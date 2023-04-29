@@ -6,9 +6,9 @@ backend_pod_name := backend-deployment
 helm_installation_name := tiny-django
 
 backend_migrate_static:
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py makemigrations
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py migrate
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py collectstatic --noinput
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py makemigrations
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py migrate
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py collectstatic --noinput
 
 backend_build:
 	docker build -t localhost:32000/backend-image:latest -f Dockerfile.back_dev back
@@ -19,6 +19,10 @@ backend_build_prod:
 	$(MAKE) backend_build
 	$(MAKE) backend_migrate_static
 	docker build -t localhost:32000/backend-image-prod:latest -f Dockerfile.back back
+	
+# create the default development admin user
+backend_create_dev_admin:
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py shell --command 'from core.tools import get_or_create_base_admin; get_or_create_base_admin()'
 
 backend_push:
 	docker push localhost:32000/backend-image:latest
@@ -59,6 +63,9 @@ full_build_deploy:
 	$(MAKE) backend_build_push
 	$(MAKE) frontend_build_push
 	
+start_redis:
+	docker run -p 6379:6379 redis:5
+	
 microk8s_attach_backend:
 	microk8s kubectl exec --stdin --tty $(backend_pod_name) -n $(kubernetes_namespace) -- sh
 	
@@ -78,6 +85,7 @@ helm_dry_install:
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --dry-run
 	
 helm_install:
+	helm dependency build
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir)
 
 helm_uninstall:
