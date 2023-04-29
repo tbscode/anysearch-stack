@@ -19,6 +19,15 @@ module.exports = {
         'grayout': '#959595',
         'softwhite': '#F8F8F8',
       },
+      animation: {
+        'wiggle': 'wiggle 1.2s ease-in-out infinite',
+      },
+      keyframes: {
+        wiggle: {
+          '0%, 100%': { transform: 'translateY(-7px)' },
+          '50%': { transform: 'translateY(7px)' },
+        }
+      }
     },
   },
   plugins: [require('daisyui')],
