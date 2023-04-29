@@ -15,3 +15,6 @@ ipython
 django-jazzmin
 psycopg2-binary
 uvicorn[standard]
+pdfkit
+mistune
+whitenoise

@@ -1,14 +1,14 @@
 root_dir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 backend_img_sha := $(shell docker images -q localhost:32000/backend-image:latest)
 frontend_img_sha := $(shell docker images -q localhost:32000/frontend-image:latest)
-kubernetes_namespace := tiny-django
+kubernetes_namespace := anychat
 backend_pod_name := backend-deployment
-helm_installation_name := tiny-django
+helm_installation_name := anychat-helm
 
 backend_migrate_static:
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py makemigrations
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py migrate
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py collectstatic --noinput
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py makemigrations
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py migrate
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py collectstatic --noinput
 
 backend_build:
 	docker build -t localhost:32000/backend-image:latest -f Dockerfile.back_dev back
@@ -22,7 +22,7 @@ backend_build_prod:
 	
 # create the default development admin user
 backend_create_dev_admin:
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py shell --command 'from core.tools import get_or_create_base_admin; get_or_create_base_admin()'
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py shell --command 'from core.tools import get_or_create_base_admin; get_or_create_base_admin()'
 
 backend_push:
 	docker push localhost:32000/backend-image:latest
@@ -85,8 +85,13 @@ helm_dry_install:
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --dry-run
 	
 helm_install:
-	helm dependency build
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir)
+
+helm_install_prod:
+	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --values ./helm-chart/production-values.yaml
+
+helm_install_prod_dry:
+	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --values ./helm-chart/production-values.yaml --dry-run
 
 helm_uninstall:
 	microk8s helm uninstall $(helm_installation_name)

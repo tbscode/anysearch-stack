@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import pgettext_lazy
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 import base64
 from uuid import uuid4
 
@@ -58,24 +58,28 @@ class LanguageChoices(models.TextChoices):
     SWAHILI = "swahili", pgettext_lazy("profile.lang.swahili", "Swahili")
 
 
-class UserManager(models.Manager):
-    def create(self, **kwargs):
+class UserManager(BaseUserManager):
+    def create(self, password, **kwargs):
         user = self.model(
             profile=UserProfile.objects.create(),
             settings=UserSetting.objects.create(),
             **kwargs,
         )
-        user.save(using=self._db)
 
-    def create_superuser(self, **kwargs):
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, password, **kwargs):
         kwargs["is_staff"] = True
         kwargs["is_superuser"] = True
 
-        user = self.create(**kwargs)
+        user = self.create(password, **kwargs)
         return user
 
 
 class User(AbstractUser):
+    objects = UserManager()
     show_second_name = models.BooleanField(default=False)
 
     hash = models.UUIDField(default=uuid4, editable=False, unique=True)
@@ -89,8 +93,6 @@ class User(AbstractUser):
 
     projects = models.ManyToManyField(
         'Project', related_name='user_projects', blank=True, null=True)
-
-    objects = UserManager()
 
 
 class UserProfile(models.Model):

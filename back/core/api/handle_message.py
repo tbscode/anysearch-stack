@@ -95,4 +95,5 @@ def handle_socket_message(data, user):
     # Now check if the message requres additional actions
     # if it starts with `@ai` an AI assistant should reply
     if data.test.startswith("@ai"):
+        # TODO ....
         pass

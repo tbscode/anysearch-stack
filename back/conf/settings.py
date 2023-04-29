@@ -1,13 +1,16 @@
 import os
+from pathlib import Path
 import sys
 BASE_ADMIN_USERNAME = os.environ.get("BASE_ADMIN_USERNAME", "admin")
 BASE_ADMIN_USER_PASSWORD = os.environ.get(
     "BASE_ADMIN_USER_PASSWORD", "password")
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() in ('true', '1', 't')
 IGNORABLE_404_URLS = [r'^favicon\.ico$']
 ROOT_URLCONF = 'conf.urls'
+BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 INSTALLED_APPS = [
+    'core',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,7 +19,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'core',
     'django_nextjs.apps.DjangoNextJSConfig',
     'drf_spectacular',
     'drf_spectacular_sidecar',
@@ -24,6 +26,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -36,6 +39,22 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": "db.sqlite3",
+    }
+}
+
+DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
+DATABASES = {
+    'default': {
+        'ENGINE': DB_ENGINE,
+        'NAME': BASE_DIR / 'db.sqlite3',
+        **({
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ['DB_PORT'],
+            'OPTIONS': {'sslmode': 'require'}
+        } if 'postgresql' in os.environ.get("DB_ENGINE", "") else {})
     }
 }
 REST_FRAMEWORK = {
@@ -90,6 +109,21 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+    },
+]
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 

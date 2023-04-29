@@ -3,7 +3,7 @@ from .views import index
 from . import api
 
 urlpatterns = [
+    path("api/register", api.register.register_user),
+    path("api/login", api.login.login_user),
     re_path(r'^(?P<path>.*)$', index),
-    path("api/register", register_user),
-    path("api/login", register_user),
 ]
