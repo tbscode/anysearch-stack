@@ -2,6 +2,7 @@ from rest_framework_dataclasses.serializers import DataclassSerializer
 from typing import Literal, Optional, List, Dict
 from datetime import datetime
 from drf_spectacular.utils import extend_schema
+import base64
 from dataclasses import dataclass
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes, throttle_classes
@@ -12,14 +13,16 @@ from django.contrib.auth import authenticate, login
 from core.models import Project, ChatMessage
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
+from core.api.user_data import serialize_message
 
 
 @dataclass
 class MessageRequest:
     project_hash: str
-    type: Literal["message", "typing", "seen"]
+    type: Literal["new_message", "typing", "seen"]
     text: Optional[str]
     data: Optional[Dict]
+    file_attachment: Optional[str]
 
 
 class MessageRequestSerializer(DataclassSerializer):
@@ -56,21 +59,40 @@ def handle_socket_message(data, user):
     data = serializer.save()
 
     project = Project.objects.get(hash=data.project_hash)
+    project_group_slug = f"project-{project.hash}"
 
-    ChatMessage.objects.create(
+    extra_params = {}
+    if data.file_attachment:
+        file_data = data.file_attachment.encode()
+        content = base64.b64decode(file_data)
+        extra_params["file_attachment"] = content
+
+    # translate the message in all languages that are used in that project
+    # TODO ... which api to use again ?
+
+    message = ChatMessage.objects.create(
         project=project,
         original_message=data.text,
+        sender=user,
+        **extra_params
     )
 
     channel_layer = get_channel_layer()  # default channel layer
 
+    # Now nofify all users connected to that channel group
     async_to_sync(channel_layer.group_send)(project_group_slug, {
         "type": "broadcast_message",
         "data": {
-            "event": data.type,
+            "event": data.event,
+            **serialize_message(message),
             "user": {
                 "hash": user.hash,
                 "name": user.first_name
             }
         }
     })
+
+    # Now check if the message requres additional actions
+    # if it starts with `@ai` an AI assistant should reply
+    if data.test.startswith("@ai"):
+        pass
