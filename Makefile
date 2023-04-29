@@ -22,7 +22,7 @@ backend_build_prod:
 	
 # create the default development admin user
 backend_create_dev_admin:
-	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 app.py shell --command 'from core.tools import get_or_create_base_admin; get_or_create_base_admin()'
+	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py shell --command 'from core.tools import get_or_create_base_admin; get_or_create_base_admin()'
 
 backend_push:
 	docker push localhost:32000/backend-image:latest
