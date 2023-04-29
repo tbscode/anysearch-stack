@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import { testData } from "../components/testData";
+import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 console.log(testData.hash);
 
@@ -33,7 +34,7 @@ export const getServerSideProps = async ({ req }: { req: any }) => {
   return { props: {} };
 };
 
-export default function Index({ state, updateTheme }): JSX.Element {
+export default function Chat({ state, setState,updateTheme }): JSX.Element {
   console.log("STATE", state);
   const scrollRef = useRef(null);
 
@@ -47,12 +48,94 @@ export default function Index({ state, updateTheme }): JSX.Element {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, []);
+  }, [scrollRef.current]);
   
   console.log("DATA", state.data)
   
+  
+  console.log("STATE", state);
+  
+  const [socketUrl, setSocketUrl] = useState(process.env.NEXT_PUBLIC_WS_PATH);
+  const [messageHistory, setMessageHistory] = useState([]);
+  const [onlineChatId, setOnlineChatId] = useState(0);
+  const [inputState, setInputState] = useState("")
+  const [curProject, setCurProject] = useState(0)
+  const [selectedLanguage, setSelectedLanguage] = useState("dutch")
+
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      setMessageHistory((prev) => prev.concat(lastMessage));
+      const data = JSON.parse(lastMessage.data);
+      console.log("message receiveed", data);
+      /**
+       * Here we can process any incoming websocket calls
+       */
+      if(data.event === "new_message"){
+        const newState = JSON.parse(JSON.stringify(state));
+
+        // TODO don't use current project but deteermine it by project hash!
+        if (data.hash === state.data.hash) {
+          newState.data.projects[curProject].messages.map((message) => {
+            if(message.hash === "temp"){
+              return data
+            }else{
+              return message
+            }
+          })
+        }else{
+          newState.data.projects[curProject].messages.push(data)
+        }
+        setState(newState) 
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }
+    }
+  }, [lastMessage, setMessageHistory]);
+ 
+  const messagesEndRef = useRef()
+
+  
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: 'Connecting',
+    [ReadyState.OPEN]: 'Connected',
+    [ReadyState.CLOSING]: 'Closing',
+    [ReadyState.CLOSED]: 'Offline',
+    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+  }[readyState];
+
   if(!state.data){
     return <div>loading...</div> 
+  }
+
+  const sendSocketMessage = (text) => {
+          sendMessage(
+            JSON.stringify({
+              type: 'new_message',
+              text: text,
+              project_hash: state.data.projects[curProject].project_hash,
+              data: {}
+            })
+          );
+          
+        //setState({})
+        const newState = JSON.parse(JSON.stringify(state));
+
+        //newState.data.projects[curProject].messages.push({})
+        newState.data.projects[curProject].messages.push({
+          hash: "temp",
+          text: text,
+          data: {[selectedLanguage]: text},
+          sender: state.data.hash
+        })
+        setState(newState) 
+
   }
 
   const filteredProjects = state.data.projects.filter((project) =>
@@ -151,13 +234,16 @@ export default function Index({ state, updateTheme }): JSX.Element {
           <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">
             + Invite Member
           </button>
+          <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">
+            websocket state: {connectionStatus}
+          </button>
         </div>
         <section
           id="chatInner"
           className="h-full w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end"
         >
           <div className="h-80 overflow-scroll scroll-bottom" ref={scrollRef}>
-{state.data.projects[0].messages.map((message) => {
+{state.data.projects[curProject].messages.map((message) => {
   const isSender = message.sender === state.data.hash;
   const chatClass = isSender ? "chat-end" : "chat-start";
   const chatDirection = isSender ? "ml-2" : "mr-2";
@@ -170,20 +256,28 @@ export default function Index({ state, updateTheme }): JSX.Element {
         </div>
       </div>
       <div className="chat-bubble bg-softwhite">
-        {message.data.dutch}
+        {message.data[selectedLanguage]}
       </div>
     </div>
   );
 })}
+<div ref={messagesEndRef} />
           </div>
 
           <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4">
             <input
+              id="chatInput"
               type="text"
               placeholder="Type here"
               className="input w-full bg-softwhite outline-none"
+              onChange={(e) => {
+                setInputState(e.target.value)
+              }}
             />
-            <button className="btn ">Hello daisyUI</button>
+            <button className="btn " onClick={(e) => {
+              document.getElementById("chatInput").value = "";
+              sendSocketMessage(inputState);
+            }}>SEND</button>
           </div>
         </section>
       </section>
@@ -198,6 +292,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
         <p className="text-grayout text-xs">8 Members</p>
         <div className="flex flex-col gap-2">
           Actions
+          <div className="dropdown dropdown-end">
           <button className="btn gap-2">
             <svg
               width="24"
@@ -229,6 +324,17 @@ export default function Index({ state, updateTheme }): JSX.Element {
             </svg>
             Change Lenguage
           </button>
+  <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+  {state.data.projects[curProject].languages.map((lang, index) => {
+    return (
+      <li key={index}><a onClick={() => {
+        console.log("CHANGED LANG", lang)
+        setSelectedLanguage(lang)
+      }}>{lang}</a></li>
+    )
+  })}
+  </ul>
+</div>
           <button className="btn gap-2">
             <svg
               width="24"
