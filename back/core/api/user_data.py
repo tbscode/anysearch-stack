@@ -27,20 +27,24 @@ def get_project_participants(project):
     return data
 
 
+def serialize_message(message):
+    attachment = None
+    if message.file_attachment:
+        attachment = message.get_attachment_b64()
+    return {
+        "time": message.time,
+        "data": message.data,
+        "sender": message.sender.hash,
+        "hash": message.hash,
+        "attachment": attachment,
+    }
+
+
 def get_project_messages(project):
     messages = ChatMessage.objects.filter(project=project).order_by('time')
     data = []
     for message in messages:
-        attachment = None
-        if message.file_attachment:
-            attachment = message.get_attachment_b64()
-        data.append({
-            "time": message.time,
-            "data": message.data,
-            "sender": message.sender.hash,
-            "hash": message.hash,
-            "attachment": attachment,
-        })
+        data.append(serialize_message(message))
     return data
 
 
