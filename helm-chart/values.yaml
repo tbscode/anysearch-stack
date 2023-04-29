@@ -6,7 +6,7 @@ production: false
 development: true
 useRedis: false
 certmanager:
-  secretKeyName: 'letsencrypt-prod'
+  secretKeyName: letsencrypt-prod
   email: 'benjamin.tim@gmx.de'
   apiServer: 'https://acme-v02.api.letsencrypt.org/directory'
   name: some
@@ -30,6 +30,7 @@ backend:
     volumeName: backend-dev-volume
     storage: 5Gi
   env:
+    DJANGO_DEBUG: 'true'
     ROOT_URL: 'http://localhost'
     DJANGO_SECRET_KEY: 'SomeSecret'
     DJANGO_ALLOWED_HOSTS: '*'
