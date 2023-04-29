@@ -3,7 +3,7 @@ backend_img_sha := $(shell docker images -q localhost:32000/backend-image:latest
 frontend_img_sha := $(shell docker images -q localhost:32000/frontend-image:latest)
 kubernetes_namespace := anychat
 backend_pod_name := backend-deployment
-helm_installation_name := tiny-django
+helm_installation_name := anychat-helm
 
 backend_migrate_static:
 	docker run -v $(root_dir)/back:/back -it $(backend_img_sha) python3 manage.py makemigrations
@@ -89,6 +89,9 @@ helm_install:
 
 helm_install_prod:
 	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --values ./helm-chart/production-values.yaml
+
+helm_install_prod_dry:
+	microk8s helm install --debug $(helm_installation_name) ./helm-chart/ --set rootDir=$(root_dir) --values ./helm-chart/production-values.yaml --dry-run
 
 helm_uninstall:
 	microk8s helm uninstall $(helm_installation_name)
