@@ -24,7 +24,7 @@ def create_simple_user_setup():
         user.profile.save()
         users.append(user)
 
-    project_cutoff = 14
+    project_cutoff = 10
 
     project1 = Project.objects.create(
         name="Ceiling of mister maier",
@@ -32,7 +32,7 @@ def create_simple_user_setup():
     )
 
     # add the first project_cutoff user to project1
-    for user in users[:project_cutoff]:
+    for user in users[:project_cutoff + 5]:
         project1.participants.add(user)
         user.projects.add(project1)
         user.save()
