@@ -84,6 +84,8 @@ class User(AbstractUser):
     settings = models.OneToOneField(
         'UserSetting', on_delete=models.CASCADE)
 
+    is_boss = models.BooleanField(default=False)
+
     projects = models.ManyToManyField(
         'Project', related_name='user_projects', blank=True, null=True)
 
@@ -106,7 +108,7 @@ class Project(models.Model):
     name = models.CharField(max_length=1000)
     description = models.TextField()
 
-    image_type = models.CharField(
+    base_language = models.CharField(
         choices=LanguageChoices.choices,
         default=LanguageChoices.ENGLISH,
         max_length=255)
@@ -126,3 +128,5 @@ class ChatMessage(models.Model):
     data = models.JSONField()
     sender = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, blank=True, related_name='message_user')
+
+    hash = models.UUIDField(default=uuid4, editable=False, unique=True)
