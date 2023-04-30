@@ -128,9 +128,9 @@ def request_report(request):
     #out, after_state, token_usage = agent(prompt)
 
     prompts = [
-        "based on the whole conversation determine the topic of the project and generate a short description"]
-    #"Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
-    #"Based on the whole conversation plase generate timeline of events that took flace",
+        "based on the whole conversation determine the topic of the project and generate a short description",
+        "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list",
+        "Based on the whole conversation plase generate timeline of events that took flace"]
     #"Based on the whole conversation plase judge how the project performance was"
     # ]
 
@@ -226,8 +226,10 @@ def request_report(request):
     uuid = uuid4()
     # convert_markdown(out, output_folder_path="/tmp",
     #                 output_file_name=str(uuid))
-    temp_file = f"/tmp/{uuid}.pdf"
-    markdown_to_pdf(out, temp_file)
+    temp_file = f"/tmp/{uuid}.md"
+    #markdown_to_pdf(out, temp_file)
+    with open(temp_file, "w") as file:
+        file.write(out)
 
     base64_string = pdf_to_base64(temp_file)
     print("base64_string", base64_string)
@@ -240,7 +242,7 @@ def request_report(request):
         original_message=out,
         sender=ai_user_for_project,
         file_attachment=file_content_bytes,
-        file_meta="data:application/pdf;base64",
+        file_meta="data:text/markdown;base64",
         data=translate_to_all_langs_in_list(
             "hallo", project_langs, str("english")),
     )
