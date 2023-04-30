@@ -162,7 +162,7 @@ def request_report(request):
     i = 0
     for pompt in prompts:
         past_messages = ChatMessage.objects.filter(
-            project=project).order_by("-time")
+            project=project).order_by("-time")[:15]  # TODO: prompt splitting should happen here!
 
         # setup a db agent:
         # It gets the full message history
@@ -227,11 +227,14 @@ def request_report(request):
     base64_string = pdf_to_base64(temp_file)
     print("base64_string", base64_string)
 
+    with open(temp_file, 'rb') as file:
+        file_content_bytes = file.read()
+
     new_message = ChatMessage.objects.create(
         project=project,
         original_message=msg,
         sender=ai_user_for_project,
-        file_attachment=base64_string,
+        file_attachment=file_content_bytes,
         file_meta="data:application/pdf;base64,",
         data=translate_to_all_langs_in_list(
             msg, project_langs, str("english")),
