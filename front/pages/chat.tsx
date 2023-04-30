@@ -127,15 +127,27 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
     return <div>loading...</div>;
   }
 
-  const sendSocketMessage = (text) => {
-    sendMessage(
-      JSON.stringify({
-        type: "new_message",
-        text: text,
-        project_hash: state.data.projects[curProject].project_hash,
-        data: {},
-      })
-    );
+  const sendSocketMessage = (text, attachment = null) => {
+    console.log("Attachl", attachment)
+    if(!attachment)
+      sendMessage(
+        JSON.stringify({
+          type: "new_message",
+          text: text,
+          project_hash: state.data.projects[curProject].project_hash,
+          data: {},
+        })
+      );
+    else
+      sendMessage(
+        JSON.stringify({
+          type: "new_message",
+          text: text,
+          project_hash: state.data.projects[curProject].project_hash,
+          data: {},
+          file_attachment: attachment
+        })
+      );
 
     //setState({})
     const newState = JSON.parse(JSON.stringify(state));
@@ -273,6 +285,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                     </div>
                   </div>
                   <div className="chat-bubble bg-softwhite">
+                    {message.attachment &&  <img src={message.attachment} />}
                     {message.data[selectedLanguage]}
                   </div>
                 </div>
@@ -296,22 +309,24 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                 console.log("SEND triggered")
                 if( document.getElementById("fileUpload").files.length == 0 ){
                     console.log("no files selected");
+
+                    if (
+                      e.key === "Enter" &&
+                      !e.shiftKey &&
+                      document.getElementById("chatInput").value != ""
+                    ) {
+                      e.preventDefault();
+                      document.getElementById("chatInput").value = "";
+                      sendSocketMessage(inputState);
+                    }
                 }else{
                   console.log("files selected", );
                   getBase64(document.getElementById("fileUpload").files[0]).then(
                     data => {
                       console.log("File converted", data)
+                      sendSocketMessage("file", data);
                     }
                   )
-                }
-                if (
-                  e.key === "Enter" &&
-                  !e.shiftKey &&
-                  document.getElementById("chatInput").value != ""
-                ) {
-                  e.preventDefault();
-                  document.getElementById("chatInput").value = "";
-                  sendSocketMessage(inputState);
                 }
               }}
             />
@@ -347,7 +362,8 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
         <p className="text-softwhite font-medium text text-xl">Designer Team</p>
         <p className="text-grayout text-xs">8 Members</p>
         <div className="flex flex-col gap-2">
-          Actions Your language: {state.data.language}
+          Actions Your language: {state.data.language} <br></br>
+          Socket state: {connectionStatus}
           <div className="dropdown dropdown-end">
             <button className="btn gap-2">
               <svg
