@@ -266,7 +266,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
           <option>Assistants</option>
         </select>
 
-        <div className="drawer drawer-mobile flex h-full">
+        <div className="drawer drawer-mobile flex h-full w-full">
           <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
           <div className="drawer-content flex flex-col items-center justify-center">
             {/* <label
@@ -373,12 +373,12 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                       <img src={message.profile_image} />
                     </div>
                   </div>
-                  <div className="chat-bubble bg-softwhite">
-                    {(message.attachment && isBase64Image(message.attachment)) &&  <img src={message.attachment} />}
+                  <div className="chat-bubble bg-softwhite flex-col gap-1">
+                    <p>{(!(message.attachment && message.data[selectedLanguage] == 'file') && message.data[selectedLanguage])}</p>
+                    {(message.attachment && isBase64Image(message.attachment)) &&  <img className="max-h max-h-52" src={message.attachment} />}
                     {(message.attachment && !isBase64Image(message.attachment)) &&  <button className="btn" onClick={() => {
                       downloadBase64File(message.attachment, `file.${getFileExtensionFromBase64(message.attachment)}`)
-                    }}>File: {getFileTypeFromBase64(message.attachment)}</button>}
-                    {message.data[selectedLanguage]}
+                    }}>{getFileTypeFromBase64(message.attachment)}</button>}
                   </div>
                 </div>
               );
