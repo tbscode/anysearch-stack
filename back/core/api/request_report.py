@@ -20,6 +20,30 @@ from core.mdconverter import convert_markdown
 from uuid import uuid4
 import base64
 
+import sys
+import markdown2
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+
+
+def markdown_to_pdf(markdown_text, output_file):
+    # Read input markdown file
+    # Convert markdown to HTML
+    html_text = markdown2.markdown(markdown_text)
+
+    # Create a PDF document
+    doc = SimpleDocTemplate(output_file, pagesize=letter)
+
+    # Get the default Paragraph style
+    style = getSampleStyleSheet()['BodyText']
+
+    # Convert HTML to a list of Paragraphs
+    paragraphs = [Paragraph(p, style) for p in html_text.split('<br />')]
+
+    # Build the PDF document using the paragraphs
+    doc.build(paragraphs)
+
 
 def pdf_to_base64(file_path):
     with open(file_path, "rb") as pdf_file:
@@ -197,27 +221,21 @@ def request_report(request):
 
     msg = "Heres your report"
 
-    temp_file = f"{uuid4()}"
-    convert_markdown(out, output_folder_path="/tmp",
-                     output_format="pdf", output_file_name=temp_file)
-    temp_file = "/tmp/" + temp_file + ".pdf"
+    temp_file = f"/tmp/{uuid4()}.pdf"
+    markdown_to_pdf(out, temp_file)
 
-    base64 = pdf_to_base64(temp_file)
-
-    file_meta, file_content = base64.split(',')
+    base64_string = pdf_to_base64(temp_file)
+    print("base64_string", base64_string)
 
     new_message = ChatMessage.objects.create(
         project=project,
         original_message=msg,
         sender=ai_user_for_project,
-        file_attachment=file_content,
-        file_meta=file_meta,
+        file_attachment=base64_string,
+        file_meta="data:application/pdf;base64,",
         data=translate_to_all_langs_in_list(
             msg, project_langs, str("english")),
     )
     send_message(new_message)
-
-    print(base64)
-    # Report
 
     return Response(status=status.HTTP_200_OK)
