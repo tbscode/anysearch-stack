@@ -100,6 +100,7 @@ export const getServerSideProps = async ({ req }: { req: any }) => {
 export default function Chat({ state, setState, updateTheme }): JSX.Element {
   console.log("STATE", state);
   const scrollRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [inputValue, setInputValue] = useState("");
 
@@ -112,6 +113,11 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [scrollRef.current]);
+
+      
+      function handleClick() {
+        fileInputRef.current.click();
+      }
 
   console.log("DATA", state.data);
 
@@ -201,6 +207,8 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
         })
       );
 
+
+
     //setState({})
     const newState = JSON.parse(JSON.stringify(state));
 
@@ -247,9 +255,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
   const filteredProjects = state.data.projects.filter((project) =>
     project.name.toLowerCase().includes(inputValue.toLowerCase())
   );
-
-  console.log(state.data);
-
+    
   return (
     <main className="flex bg-background max-h-screen overflow-hidden">
       <nav className="flex flex-col">
@@ -380,7 +386,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4">
+          <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4 gap-4">
             <input
               id="chatInput"
               type="text"
@@ -416,7 +422,14 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                 }
               }}
             />
-            <input type="file" className="file-input file-input-bordered w-full max-w-xs" id="fileUpload"/>
+            
+            <button className="rounded-r-xl rounded-l-4xl bg-transparent" onClick={handleClick}>
+            <svg width="24" height="28" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15.7502C20.4 15.7502 20 16.2168 20 16.9168V19.8335C20 21.8168 18.6 23.4502 16.9 23.4502H7.1C5.4 23.3335 4 21.7002 4 19.7168V8.2835C4 6.30016 5.4 4.66683 7.1 4.66683H11.1C11.3 4.66683 11.6 4.66683 11.8 4.7835V8.2835C11.8 11.5502 14.1 14.2335 16.9 14.2335H21C21.4 14.2335 21.8 14.0002 21.9 13.5335C22.1 13.0668 22 12.6002 21.7 12.2502L14.7 4.0835C13.7 2.91683 12.5 2.3335 11.1 2.3335H7.1C4.3 2.3335 2 5.01683 2 8.2835V19.7168C2 22.9835 4.3 25.6668 7.1 25.6668H16.9C19.7 25.6668 22 22.9835 22 19.7168V16.8002C22 16.2168 21.6 15.7502 21 15.7502ZM13.8 6.30016L18.6 11.9002H16.9C15.2 11.9002 13.8 10.2668 13.8 8.2835V6.30016Z" fill="#181A1E"/>
+            </svg>
+          </button>
+          <input type="file" className="file-input file-input-bordered w-full max-w-xs hidden" id="fileUpload" ref={fileInputRef} />
+
             <button
               className="btn rounded-r-xl rounded-l-4xl"
               onClick={(e) => {
