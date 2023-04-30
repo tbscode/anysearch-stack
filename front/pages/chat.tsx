@@ -2,6 +2,38 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+
+function getFileExtensionFromBase64(base64String) {
+  const fileExtensionRegex = /^data:[a-zA-Z]+\/([a-zA-Z0-9-.+]+);/;
+
+  const match = base64String.match(fileExtensionRegex);
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  return 'unknown';
+}
+
+function downloadBase64File(base64String, fileName) {
+  const link = document.createElement('a');
+  link.href = base64String;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function getFileTypeFromBase64(base64String) {
+  const fileTypeRegex = /^data:([a-zA-Z]+\/[a-zA-Z0-9-.+]+);/;
+
+  const match = base64String.match(fileTypeRegex);
+  if (match && match[1]) {
+    const fileType = match[1].split('/')[0];
+    return fileType;
+  }
+
+  return 'unknown';
+}
 import { Flag } from 'react-world-flags';
 
 export const getCookiesAsObject = () => {
@@ -24,6 +56,12 @@ function FlagComponent({ country }) {
   // return <Flag code={countryCode} />;
 }
 
+
+function isBase64Image(base64String) {
+  const imageFormatRegex = /^data:image\/[a-zA-Z]+;base64,/;
+
+  return imageFormatRegex.test(base64String);
+}
 
 function getBase64(file) {
   return new Promise((resolve, reject) => {
@@ -163,13 +201,24 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
     const newState = JSON.parse(JSON.stringify(state));
 
     //newState.data.projects[curProject].messages.push({})
+    if(!attachment)
+      newState.data.projects[curProject].messages.push({
+        hash: "temp",
+        text: text,
+        data: { [selectedLanguage]: text },
+        sender: state.data.hash,
+        profile_image: state.data.profile_image,
+      });
+    else
     newState.data.projects[curProject].messages.push({
       hash: "temp",
       text: text,
       data: { [selectedLanguage]: text },
       sender: state.data.hash,
+      attachment: attachment,
       profile_image: state.data.profile_image,
     });
+
     setState(newState);
   };
 
@@ -297,7 +346,10 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                     </div>
                   </div>
                   <div className="chat-bubble bg-softwhite">
-                    {message.attachment &&  <img src={message.attachment} />}
+                    {(message.attachment && isBase64Image(message.attachment)) &&  <img src={message.attachment} />}
+                    {(message.attachment && !isBase64Image(message.attachment)) &&  <button className="btn" onClick={() => {
+                      downloadBase64File(message.attachment, `file.${getFileExtensionFromBase64(message.attachment)}`)
+                    }}>File: {getFileTypeFromBase64(message.attachment)}</button>}
                     {message.data[selectedLanguage]}
                   </div>
                 </div>
