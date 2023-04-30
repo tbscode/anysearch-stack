@@ -101,6 +101,13 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
   console.log("STATE", state);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [isHomeClicked, setIsHomeClicked] = useState(false);
+
+  const navStyle = isHomeClicked ? { display: 'flex' } : { display: 'none' };
+
+  function handleHomeClick() {
+    setIsHomeClicked(!isHomeClicked);
+  }
 
   const [inputValue, setInputValue] = useState("");
 
@@ -234,6 +241,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
     setState(newState);
   };
   
+  const isMobile = window.innerWidth < 600;
   
   const reportRequest = (project_hash) => {
     fetch('/api/report', {
@@ -257,8 +265,8 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
   );
     
   return (
-    <main className="flex bg-background max-h-screen overflow-hidden">
-      <nav className="flex flex-col">
+    <main className="flex bg-background max-h-screen h-screen overflow-hidden">
+      <nav className="flex-col w-full max-w-[320px] sm:flex hidden"  style={navStyle}>
         <select className="mx-auto w-11/12 select select-ghost">
           <option selected>All Chats</option>
           <option>Contacts</option>
@@ -278,7 +286,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
           </div>
           <div className="flex flex-col">
             {/* <label htmlFor="my-drawer-2" className="drawer-overlay"></label> */}
-            <div className=" mx-auto w-11/12 w-max-w-11/12">
+            <div className=" mx-auto w-11/12 max-w-[320px]">
               <input
                 type="text"
                 placeholder="Search..."
@@ -286,9 +294,10 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                 onChange={handleInputChange}
                 className=" input w-full  bg-softwhite outline-none"
               />
-              {inputValue && <p>Results for &apos;{inputValue}&apos;</p>}
+              {/* {filteredProjects.length > 0 && inputValue && <p className="mt-2 truncate">Results for &apos;{inputValue}&apos;</p>} */}
+              {filteredProjects.length < 1 && <p className="mt-2 truncate">Nothing found for &apos;{inputValue}&apos;</p>}
             </div>
-            {filteredProjects.length > 0 ? (
+            {
               <ul className="menu p-2 w-80 text-base-content">
                 {filteredProjects.map((project, index) => (
                   <li
@@ -327,15 +336,22 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                     </div>
                   </li>
                 ))}
-              </ul>
-            ) : (
-              <p>Nothing here</p>
-            )}
+              </ul>}
           </div>
         </div>
       </nav>
 
       <section id="chat" className="w-full px-2 flex flex-col">
+        <header className="pt-2 justify-between flex sm:hidden">
+          <button onClick={handleHomeClick} id="homebutton" className="btn"><svg className="w-4" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M5.36364 4.31201C4.63099 4.31201 4 4.95335 4 5.64534V7.88893C4 8.62647 4.59229 9.24052 5.40276 9.31201H7.63636C8.36901 9.31201 9 8.67068 9 7.97868V5.64534C9 4.90202 8.40932 4.31201 7.72727 4.31201H5.36364ZM2 5.64534C2 3.82452 3.55083 2.31201 5.36364 2.31201H7.72727C9.59068 2.31201 11 3.87584 11 5.64534V7.97868C11 9.7995 9.44917 11.312 7.63636 11.312H5.36364C5.34017 11.312 5.31671 11.3112 5.2933 11.3095C3.57427 11.1883 2 9.83427 2 7.88893V5.64534ZM16.3636 4.31201C15.631 4.31201 15 4.95335 15 5.64534V7.97868C15 8.67068 15.631 9.31201 16.3636 9.31201H18.6364C19.369 9.31201 20 8.67068 20 7.97868V5.64534C20 4.90202 19.4093 4.31201 18.7273 4.31201H16.3636ZM13 5.64534C13 3.82452 14.5508 2.31201 16.3636 2.31201H18.7273C20.5907 2.31201 22 3.87585 22 5.64534V7.97868C22 9.7995 20.4492 11.312 18.6364 11.312H16.3636C14.5508 11.312 13 9.7995 13 7.97868V5.64534ZM5.36364 15.312C4.63099 15.312 4 15.9533 4 16.6453V18.9787C4 19.6051 4.56786 20.2386 5.40268 20.312H7.63636C8.36901 20.312 9 19.6707 9 18.9787V16.6453C9 15.902 8.40932 15.312 7.72727 15.312H5.36364ZM2 16.6453C2 14.8245 3.55083 13.312 5.36364 13.312H7.72727C9.59068 13.312 11 14.8758 11 16.6453V18.9787C11 20.7995 9.44917 22.312 7.63636 22.312H5.36364C5.34017 22.312 5.31671 22.3112 5.2933 22.3095C3.59974 22.1901 2 20.8573 2 18.9787V16.6453ZM16.3636 15.312C15.631 15.312 15 15.9533 15 16.6453V18.9787C15 19.6707 15.631 20.312 16.3636 20.312H18.6364C19.369 20.312 20 19.6707 20 18.9787V16.6453C20 15.902 19.4093 15.312 18.7273 15.312H16.3636ZM13 16.6453C13 14.8245 14.5508 13.312 16.3636 13.312H18.7273C20.5907 13.312 22 14.8758 22 16.6453V18.9787C22 20.7995 20.4492 22.312 18.6364 22.312H16.3636C14.5508 22.312 13 20.7995 13 18.9787V16.6453Z" fill="#ddd"/>
+</svg>
+</button>
+          <button className="btn"><svg className="w-4" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.6791 18.3842C19.6769 15.9353 17.7727 14.0985 15.4676 13.1802C16.7705 12.1597 17.5723 10.5271 17.5723 8.7924C17.5723 5.52709 15.0667 2.97607 11.9598 2.97607C8.85296 2.97607 6.34741 5.52709 6.34741 8.69036C6.34741 10.4251 7.14919 12.0577 8.45207 13.0781C6.14697 13.9965 4.24275 15.8332 3.24053 18.2822C2.83964 19.3026 2.93987 20.5271 3.5412 21.4455C4.14253 22.4659 5.24497 22.9761 6.44763 22.9761H17.5723C18.7749 22.9761 19.7772 22.3638 20.4787 21.4455C21.08 20.5271 21.1803 19.4046 20.6791 18.3842ZM8.35185 8.69036C8.35185 6.64954 9.9554 5.01689 11.9598 5.01689C13.9643 5.01689 15.5678 6.64954 15.5678 8.69036C15.5678 10.7312 13.9643 12.3638 11.9598 12.3638C9.9554 12.3638 8.35185 10.7312 8.35185 8.69036ZM18.7749 20.4251C18.4743 20.8332 18.0734 21.1393 17.5723 21.1393H6.34741C5.8463 21.1393 5.44542 20.9353 5.14475 20.4251C4.84408 20.0169 4.84408 19.6087 5.04453 19.2006C6.24719 16.2414 8.95318 14.4046 11.9598 14.4046C14.9665 14.4046 17.6725 16.2414 18.8752 19.0985C19.0756 19.5067 18.9754 20.0169 18.7749 20.4251Z" fill="#ddd"/>
+</svg>
+</button>
+        </header>
         <div className="flex min-h-fit gap-4 items-center m-4">
           <div className="avatar">
             <div className="w-14 relative overflow-visible">
@@ -353,8 +369,8 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
             <p className="text-grayout text-xs">8 Members</p>
           </div>
           <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">
-            + Invite Member
-          </button>
+      {isMobile ? "+ Add" : "+ Invite Member"}
+    </button>
         </div>
         <section
           id="chatInner"
@@ -470,7 +486,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
         </section>
       </section>
 
-      <section className="flex content-center align-middle flex-col justify-center min-w-fit px-12 gap-4">
+      <section className="flex content-center align-middle flex-col justify-center min-w-fit px-12 gap-4 lg:flex hidden">
         <p className="text-softwhite font-medium text-xl">You</p>
         <div className="profile">
           <img className="w-24 rounded-full" src={state.data.profile_image} />
