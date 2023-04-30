@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
-import { testData } from "../components/testData";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
 function getFileExtensionFromBase64(base64String) {
@@ -35,8 +34,7 @@ function getFileTypeFromBase64(base64String) {
 
   return 'unknown';
 }
-
-console.log(testData.hash);
+import { Flag } from 'react-world-flags';
 
 export const getCookiesAsObject = () => {
   // stolen: https://stackoverflow.com/a/64472572
@@ -46,6 +44,18 @@ export const getCookiesAsObject = () => {
       .map((v) => v.split(/=(.*)/s).map(decodeURIComponent))
   );
 };
+
+function FlagComponent({ country }) {
+  // Convert the country name to the ISO 3166-1 alpha-2 code
+  const countryCodes = {
+    serbian: 'RS',
+    // Add more country codes here
+  };
+  const countryCode = countryCodes[country.toLowerCase()];
+
+  // return <Flag code={countryCode} />;
+}
+
 
 function isBase64Image(base64String) {
   const imageFormatRegex = /^data:image\/[a-zA-Z]+;base64,/;
@@ -237,6 +247,8 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
   const filteredProjects = state.data.projects.filter((project) =>
     project.name.toLowerCase().includes(inputValue.toLowerCase())
   );
+
+  console.log(state.data);
 
   return (
     <main className="flex bg-background max-h-screen overflow-hidden">
@@ -430,14 +442,15 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
         </section>
       </section>
 
-      <section className="flex content-center align-middle flex-col justify-center min-w-fit px-12">
+      <section className="flex content-center align-middle flex-col justify-center min-w-fit px-12 gap-4">
         <p className="text-softwhite font-medium text-xl">You</p>
-        <img className="w-24 rounded-full" src={state.data.profile_image} />
-        <p className="text-softwhite font-medium text text-xl">Designer Team</p>
-        <p className="text-grayout text-xs">8 Members</p>
+        <div className="profile">
+          <img className="w-24 rounded-full" src={state.data.profile_image} />
+          <p className="text-softwhite font-medium text text-xl">Nihao Sano</p>
+          <p className="text-grayout text-xs capitalize">{state.data.language}</p>
+        </div>
         <div className="flex flex-col gap-2">
-          Actions Your language: {state.data.language} <br></br>
-          Socket state: {connectionStatus}
+        <FlagComponent country="serbian" />
           <div className="dropdown dropdown-end">
             <button className="btn gap-2">
               <svg
@@ -468,15 +481,15 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                   fill="#D3D3D3"
                 />
               </svg>
-              Change Lenguage
+              Change Language
             </button>
             <ul
               tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 overflow-scroll h-60 flex flex-col flex-nowrap"
             >
               {state.data.projects[curProject].languages.map((lang, index) => {
                 return (
-                  <li key={index}>
+                  <li key={index} className="capitalize">
                     <a
                       onClick={() => {
                         console.log("CHANGED LANG", lang);
