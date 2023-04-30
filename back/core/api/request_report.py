@@ -22,9 +22,9 @@ import base64
 
 import sys
 import markdown2
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+#from reportlab.lib.pagesizes import letter
+#from reportlab.platypus import SimpleDocTemplate, Paragraph
+#from reportlab.lib.styles import getSampleStyleSheet
 
 
 def markdown_to_pdf(markdown_text, output_file):
@@ -128,9 +128,11 @@ def request_report(request):
     #out, after_state, token_usage = agent(prompt)
 
     prompts = [
-        "based on the whole conversation determine the topic of the project and generate a short description",
-        "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
-    ]
+        "based on the whole conversation determine the topic of the project and generate a short description"]
+    #"Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
+    #"Based on the whole conversation plase generate timeline of events that took flace",
+    #"Based on the whole conversation plase judge how the project performance was"
+    # ]
 
     parts = [
         "description",
@@ -221,8 +223,11 @@ def request_report(request):
 
     msg = "Heres your report"
 
-    temp_file = f"/tmp/{uuid4()}.pdf"
-    markdown_to_pdf(out, temp_file)
+    uuid = uuid4()
+    convert_markdown(out, output_folder_path="/tmp",
+                     output_file_name=str(uuid))
+    temp_file = f"/tmp/{uuid}.pdf"
+    #markdown_to_pdf(out, temp_file)
 
     base64_string = pdf_to_base64(temp_file)
     print("base64_string", base64_string)
