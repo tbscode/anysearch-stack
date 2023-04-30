@@ -82,17 +82,14 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
         // TODO don't use current project but deteermine it by project hash!
         console.log("OWN USER", data.sender, state.data.hash)
         if (data.sender === state.data.hash) {
-          newState.data.projects[curProject].messages.map((message) => {
-            if(message.hash === "temp"){
-              return data
-            }else{
-              return message
-            }
-          })
+          console.log("HASH match")
+          newState.data.projects[curProject].messages = newState.data.projects[curProject].messages.filter((message) => message.hash !== "temp")          
+          newState.data.projects[curProject].messages.push(data)
+          setState(newState)
         }else{
           newState.data.projects[curProject].messages.push(data)
+          setState(newState) 
         }
-        setState(newState) 
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
