@@ -235,7 +235,7 @@ def request_report(request):
         original_message=msg,
         sender=ai_user_for_project,
         file_attachment=file_content_bytes,
-        file_meta="data:application/pdf;base64,",
+        file_meta="data:application/pdf;base64",
         data=translate_to_all_langs_in_list(
             msg, project_langs, str("english")),
     )
