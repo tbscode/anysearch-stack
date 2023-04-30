@@ -1,5 +1,8 @@
 from rest_framework_dataclasses.serializers import DataclassSerializer
+import openai
 from typing import Literal, Optional, List, Dict
+from core.api.db_agent import DBChatAgent
+from django.conf import settings
 from datetime import datetime
 from drf_spectacular.utils import extend_schema
 from dataclasses import dataclass
@@ -13,6 +16,20 @@ from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async, async_to_sync
 from core.models import Project, ChatMessage, translate_to_all_langs_in_list, get_langs_in_project
 from core.api.user_data import serialize_message
+from core.mdconverter import convert_markdown
+from uuid import uuid4
+import base64
+
+
+def pdf_to_base64(file_path):
+    with open(file_path, "rb") as pdf_file:
+        # Read the PDF content
+        pdf_content = pdf_file.read()
+
+        # Convert PDF content to base64 string
+        base64_content = base64.b64encode(pdf_content).decode("utf-8")
+
+    return base64_content
 
 
 @dataclass
@@ -42,30 +59,165 @@ def request_report(request):
     project_group_slug = f"project-{data.project_hash}"
 
     project = Project.objects.get(hash=data.project_hash)
-    msg = "Ok starting on that report for you give me a moment"
+    msg = "Ok starting on that report for you give me a moment\n"
+    #msg += "I'll perform the following steps to generate your report:"
+    ai_user_for_project = project.ai_user
 
     project_langs = get_langs_in_project(project)
     message = ChatMessage.objects.create(
         project=project,
-        original_message=data.text,
-        sender=request.user,
+        original_message=msg,
+        sender=ai_user_for_project,
         data=translate_to_all_langs_in_list(
             msg, project_langs, str("english")),
     )
 
-    ai_user_for_project = project.ai_user
-
     # first let the ai say that it's working on the report now
-    async_to_sync(channel_layer.group_send)(project_group_slug, {
-        "type": "broadcast_message",
-        "data": {
-            "event": data.type,
-            **serialize_message(message),
-            "user": {
-                "hash": str(ai_user_for_project.hash),
-                "name": ai_user_for_project.first_name
+    def send_message(_message):
+        async_to_sync(channel_layer.group_send)(project_group_slug, {
+            "type": "broadcast_message",
+            "data": {
+                "event": "new_message",
+                **serialize_message(_message),
+                "user": {
+                    "hash": str(ai_user_for_project.hash),
+                    "name": ai_user_for_project.first_name
+                }
             }
+        })
+
+    send_message(message)
+
+    # THis agent was to overpowerd and needed more tools to use, it would always ask to many questions so we just use the api for now
+    # agent = DBChatAgent(
+    #    ai_user=ai_user_for_project, project=project,
+    #    send_message_func=send_message,
+    #    user_lang=str(request.user.profile.language),
+    #    memory_state=message_state,
+    #    model="gpt-4",
+    #    open_ai_api_key=settings.OPENAI_KEY,
+    #    buffer_memory_token_limit=500,
+    #    verbose=True,
+    #    lang_list=project_langs,
+    #    tools=[],
+    # )
+    #out, after_state, token_usage = agent(prompt)
+
+    prompts = [
+        "based on the whole conversation determine the topic of the project and generate a short description",
+        "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
+    ]
+
+    parts = [
+        "description",
+        "outline",
+        "timeline",
+        "shedule",
+        "technicans",
+        "expenses"
+    ]
+
+    titles = [
+        "## Description",
+        "## Overview",
+        "## Timeline",
+        "## Shedule Performance",
+        "## Technicians",
+        "## Expenses",
+        "## Problems and difficulties"
+    ]
+
+    def as_message(message, user="user"):
+        return {
+            'role': user,
+            "content": message
         }
-    })
+
+    datas = {}
+
+    i = 0
+    for pompt in prompts:
+        past_messages = ChatMessage.objects.filter(
+            project=project).order_by("-time")
+
+        # setup a db agent:
+        # It gets the full message history
+        message_state = []
+
+        for message in past_messages:
+            if message.sender == ai_user_for_project:
+                message_state.append(as_message(
+                    message.original_message, "assistant"))
+            else:
+                message_state.append(as_message(
+                    message.original_message, "user"))
+
+        prompt = "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
+
+        message_state.append(as_message(prompt))
+
+        openai.api_key = settings.OPENAI_KEY
+
+        res = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=message_state,
+            stream=False
+        )
+
+        completion = res["choices"][0]["message"]["content"]
+
+        msg = ChatMessage.objects.create(
+            project=project,
+            original_message=completion,
+            sender=ai_user_for_project,
+            data=translate_to_all_langs_in_list(
+                completion, project_langs, str(project.base_language)),
+        )
+
+        datas[parts[i]] = completion
+
+        msg = f"Finished generating {titles[i]}"
+        new_message = ChatMessage.objects.create(
+            project=project,
+            original_message=msg,
+            sender=ai_user_for_project,
+            data=translate_to_all_langs_in_list(
+                msg, project_langs, str("english")),
+        )
+        send_message(new_message)
+        i += 1
+
+    out = f"# Project Report: {project.name} \n\n\n"
+    i = 0
+    for prompt in prompts:
+        out += f"{titles[i]}\n\n"
+        key = parts[i]
+        out += datas[key]
+        i += 1
+
+    msg = "Heres your report"
+
+    temp_file = f"{uuid4()}"
+    convert_markdown(out, output_folder_path="/tmp",
+                     output_format="pdf", output_file_name=temp_file)
+    temp_file = "/tmp/" + temp_file + ".pdf"
+
+    base64 = pdf_to_base64(temp_file)
+
+    file_meta, file_content = base64.split(',')
+
+    new_message = ChatMessage.objects.create(
+        project=project,
+        original_message=msg,
+        sender=ai_user_for_project,
+        file_attachment=file_content,
+        file_meta=file_meta,
+        data=translate_to_all_langs_in_list(
+            msg, project_langs, str("english")),
+    )
+    send_message(new_message)
+
+    print(base64)
+    # Report
 
     return Response(status=status.HTTP_200_OK)
