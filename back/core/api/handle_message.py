@@ -154,7 +154,7 @@ def handle_socket_message(data, user):
             send_message_func=send_message,
             user_lang=str(user.profile.language),
             memory_state=message_state,
-            model="gpt-3.5-turbo",
+            model="gpt-4",  # "gpt-3.5-turbo",
             open_ai_api_key=settings.OPENAI_KEY,
             buffer_memory_token_limit=500,
             verbose=True,
