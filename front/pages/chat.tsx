@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import { testData } from "../components/testData";
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 console.log(testData.hash);
 
@@ -34,7 +34,7 @@ export const getServerSideProps = async ({ req }: { req: any }) => {
   return { props: {} };
 };
 
-export default function Chat({ state, setState,updateTheme }): JSX.Element {
+export default function Chat({ state, setState, updateTheme }): JSX.Element {
   console.log("STATE", state);
   const scrollRef = useRef(null);
 
@@ -49,24 +49,25 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [scrollRef.current]);
-  
-  console.log("DATA", state.data)
-  
-  
+
+  console.log("DATA", state.data);
+
   console.log("STATE", state);
-  
+
   const [socketUrl, setSocketUrl] = useState(process.env.NEXT_PUBLIC_WS_PATH);
   const [messageHistory, setMessageHistory] = useState([]);
   const [onlineChatId, setOnlineChatId] = useState(0);
-  const [inputState, setInputState] = useState("")
-  const [curProject, setCurProject] = useState(0)
-  const [selectedLanguage, setSelectedLanguage] = useState(!state.data ? 'english': state.data.language)
+  const [inputState, setInputState] = useState("");
+  const [curProject, setCurProject] = useState(0);
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    !state.data ? "english" : state.data.language
+  );
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
-  
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (lastMessage !== null) {
@@ -76,11 +77,11 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
       /**
        * Here we can process any incoming websocket calls
        */
-      if(data.event === "new_message"){
+      if (data.event === "new_message") {
         const newState = JSON.parse(JSON.stringify(state));
 
         // TODO don't use current project but deteermine it by project hash!
-        console.log("OWN USER", data.sender, state.data.hash)
+        console.log("OWN USER", data.sender, state.data.hash);
         if (data.sender === state.data.hash) {
           console.log("HASH match")
           newState.data.projects[curProject].messages = newState.data.projects[curProject].messages.filter((message) => message.hash !== "temp")          
@@ -96,46 +97,44 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
       }
     }
   }, [lastMessage, setMessageHistory]);
- 
-  const messagesEndRef = useRef()
 
-  
+  const messagesEndRef = useRef();
+
   const connectionStatus = {
-    [ReadyState.CONNECTING]: 'Connecting',
-    [ReadyState.OPEN]: 'Connected',
-    [ReadyState.CLOSING]: 'Closing',
-    [ReadyState.CLOSED]: 'Offline',
-    [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Connected",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Offline",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   }[readyState];
 
-  if(!state.data){
-    return <div>loading...</div> 
+  if (!state.data) {
+    return <div>loading...</div>;
   }
 
   const sendSocketMessage = (text) => {
-          sendMessage(
-            JSON.stringify({
-              type: 'new_message',
-              text: text,
-              project_hash: state.data.projects[curProject].project_hash,
-              data: {}
-            })
-          );
-          
-        //setState({})
-        const newState = JSON.parse(JSON.stringify(state));
+    sendMessage(
+      JSON.stringify({
+        type: "new_message",
+        text: text,
+        project_hash: state.data.projects[curProject].project_hash,
+        data: {},
+      })
+    );
 
-        //newState.data.projects[curProject].messages.push({})
-        newState.data.projects[curProject].messages.push({
-          hash: "temp",
-          text: text,
-          data: {[selectedLanguage]: text},
-          sender: state.data.hash,
-          profile_image: state.data.profile_image,
-        })
-        setState(newState) 
+    //setState({})
+    const newState = JSON.parse(JSON.stringify(state));
 
-  }
+    //newState.data.projects[curProject].messages.push({})
+    newState.data.projects[curProject].messages.push({
+      hash: "temp",
+      text: text,
+      data: { [selectedLanguage]: text },
+      sender: state.data.hash,
+      profile_image: state.data.profile_image,
+    });
+    setState(newState);
+  };
 
   const filteredProjects = state.data.projects.filter((project) =>
     project.name.toLowerCase().includes(inputValue.toLowerCase())
@@ -171,16 +170,17 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
                 onChange={handleInputChange}
                 className=" input w-full  bg-softwhite outline-none"
               />
-              {inputValue && (
-                <p>Results for &apos;{inputValue}&apos;</p>
-              )}
+              {inputValue && <p>Results for &apos;{inputValue}&apos;</p>}
             </div>
             {filteredProjects.length > 0 ? (
               <ul className="menu p-2 w-80 text-base-content">
                 {filteredProjects.map((project, index) => (
-                  <li key={project.project_hash} onClick={(e) => {
-                    setCurProject(index)
-                  }}>
+                  <li
+                    key={project.project_hash}
+                    onClick={(e) => {
+                      setCurProject(index);
+                    }}
+                  >
                     <div>
                       <div className="avatar">
                         <div className="w-14 rounded-2xl">
@@ -222,8 +222,12 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
       <section id="chat" className="w-full px-2 flex flex-col">
         <div className="flex min-h-fit gap-4 items-center m-4">
           <div className="avatar">
-            <div className="w-14 rounded-2xl">
-              <img src="/_nstat/group.png" />
+            <div className="w-14 relative overflow-visible">
+            {connectionStatus === "Connected" ?
+              <span className="absolute top-0 right-0 border-background border-solid border-2 inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+              : null
+            }
+              <img className="rounded-2xl" src="/_nstat/group.png" />
             </div>
           </div>
           <div>
@@ -235,34 +239,31 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
           <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">
             + Invite Member
           </button>
-          <button className="ml-auto text-softwhite font-medium text-base cursor-pointer hover:bg-stone-900 duration-200 rounded p-3">
-            websocket state: {connectionStatus}
-          </button>
         </div>
         <section
           id="chatInner"
-          className="w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end h-full overflow-scroll"
+          className="w-full bg-darkground p-4 rounded-t-xl flex flex-col justify-end h-full overflow-auto"
         >
           <div className="h-full overflow-scroll scroll-bottom" ref={scrollRef}>
-{state.data.projects[curProject].messages.map((message) => {
-  const isSender = message.sender === state.data.hash;
-  const chatClass = isSender ? "chat-end" : "chat-start";
-  const chatDirection = isSender ? "ml-2" : "mr-2";
+            {state.data.projects[curProject].messages.map((message) => {
+              const isSender = message.sender === state.data.hash;
+              const chatClass = isSender ? "chat-end" : "chat-start";
+              const chatDirection = isSender ? "ml-2" : "mr-2";
 
-  return (
-    <div className={`chat ${chatClass}`} key={message.hash}>
-      <div className="chat-image avatar">
-        <div className={`w-12 mt-2 rounded-xl ${chatDirection}`}>
-          <img src={message.profile_image} />
-        </div>
-      </div>
-      <div className="chat-bubble bg-softwhite">
-        {message.data[selectedLanguage]}
-      </div>
-    </div>
-  );
-})}
-<div ref={messagesEndRef} />
+              return (
+                <div className={`chat ${chatClass}`} key={message.hash}>
+                  <div className="chat-image avatar">
+                    <div className={`w-12 mt-2 rounded-xl ${chatDirection}`}>
+                      <img src={message.profile_image} />
+                    </div>
+                  </div>
+                  <div className="chat-bubble bg-softwhite">
+                    {message.data[selectedLanguage]}
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="flex bg-softwhite rounded-2xl align-middle p-1 w-full mt-4">
@@ -272,71 +273,104 @@ export default function Chat({ state, setState,updateTheme }): JSX.Element {
               placeholder="Type here"
               className="input w-full bg-softwhite outline-none"
               onChange={(e) => {
-                setInputState(e.target.value)
+                setInputState(e.target.value);
+              }}
+              onKeyPress={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !e.shiftKey &&
+                  document.getElementById("chatInput").value != ""
+                ) {
+                  e.preventDefault();
+                  document.getElementById("chatInput").value = "";
+                  sendSocketMessage(inputState);
+                }
               }}
             />
-            <button className="btn " onClick={(e) => {
-              document.getElementById("chatInput").value = "";
-              sendSocketMessage(inputState);
-            }}>SEND</button>
+            <button
+              className="btn rounded-r-xl rounded-l-4xl"
+              onClick={(e) => {
+                if (document.getElementById("chatInput").value != "") {
+                  document.getElementById("chatInput").value = "";
+                  sendSocketMessage(inputState);
+                }
+              }}
+            >
+              <svg
+                className="red fill-white text-white"
+                width="24"
+                height="25"
+                viewBox="0 0 24 25"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12.2148 21.296C11.6963 21.296 11.2815 21.196 10.763 20.9961C9.62222 20.4962 9 19.3966 9 18.197V6.40064C9 5.20101 9.72593 4.20133 10.8667 3.60151C12.0074 3.10167 13.3556 3.20164 14.2889 4.00139L21.8593 9.89955C22.5852 10.4994 23 11.2991 23 12.2988C23 13.1985 22.5852 14.0982 21.8593 14.698L14.2889 20.5962C13.6667 21.0961 12.9407 21.296 12.2148 21.296ZM11.6963 5.40095C11.4889 5.50092 11.0741 5.80083 11.0741 6.40064V18.2969C11.0741 18.8967 11.4889 19.1966 11.6963 19.2966C12.1111 19.4966 12.6296 19.3966 12.9407 19.1966L20.5111 13.2985C20.8222 13.0985 20.9259 12.7986 20.9259 12.4987C20.9259 12.1988 20.8222 11.8989 20.5111 11.699L12.9407 5.80083C12.5259 5.30098 12.0074 5.30098 11.6963 5.40095Z" />
+                <path d="M6 18.296C5.4 18.296 5 17.896 5 17.296V7.29599C5 6.69599 5.4 6.29599 6 6.29599C6.6 6.29599 7 6.69599 7 7.29599V17.296C7 17.896 6.6 18.296 6 18.296Z" />
+                <path d="M2 16.296C1.4 16.296 1 15.896 1 15.296V9.29599C1 8.69599 1.4 8.29599 2 8.29599C2.6 8.29599 3 8.69599 3 9.29599V15.296C3 15.896 2.6 16.296 2 16.296Z" />
+              </svg>
+            </button>
           </div>
         </section>
       </section>
 
       <section className="flex content-center align-middle flex-col justify-center min-w-fit px-12">
         <p className="text-softwhite font-medium text-xl">You</p>
-        <img
-          className="w-24 rounded-full"
-          src={state.data.profile_image}
-        />
+        <img className="w-24 rounded-full" src={state.data.profile_image} />
         <p className="text-softwhite font-medium text text-xl">Designer Team</p>
         <p className="text-grayout text-xs">8 Members</p>
         <div className="flex flex-col gap-2">
-          Actions
-          Your language: {state.data.language}
+          Actions Your language: {state.data.language}
           <div className="dropdown dropdown-end">
-          <button className="btn gap-2">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+            <button className="btn gap-2">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22 15.2998C21.4 15.2998 21 15.6998 21 16.2998V18.9998C21 20.0998 20.1 21.0998 18.9 21.0998H16.2C15.6 21.0998 15.2 21.4998 15.2 22.0998C15.2 22.6998 15.6 23.0998 16.2 23.0998H18.9C21.1 23.0998 23 21.2998 23 18.9998V16.2998C23 15.6998 22.6 15.2998 22 15.2998Z"
+                  fill="#D3D3D3"
+                />
+                <path
+                  d="M7.8 21.0002H5.1C3.9 21.0002 3 20.1002 3 18.9002V16.2002C3 15.6002 2.6 15.2002 2 15.2002C1.4 15.2002 1 15.6002 1 16.2002V18.9002C1 21.2002 2.8 23.0002 5.1 23.0002H7.8C8.4 23.0002 8.8 22.6002 8.8 22.0002C8.8 21.4002 8.3 21.0002 7.8 21.0002Z"
+                  fill="#D3D3D3"
+                />
+                <path
+                  d="M2 8.8C2.6 8.8 3 8.4 3 7.8V5.1C3 3.9 3.9 3 5.1 3H7.8C8.4 3 8.8 2.6 8.8 2C8.8 1.4 8.4 1 7.8 1H5.1C2.8 1 1 2.8 1 5.1V7.8C1 8.3 1.4 8.8 2 8.8Z"
+                  fill="#D3D3D3"
+                />
+                <path
+                  d="M18.9 1H16.2C15.6 1 15.2 1.4 15.2 2C15.2 2.6 15.6 3 16.2 3H18.9C20.1 3 21 3.9 21 5.1V7.8C21 8.4 21.4 8.8 22 8.8C22.6 8.8 23 8.4 23 7.8V5.1C23 2.8 21.2 1 18.9 1Z"
+                  fill="#D3D3D3"
+                />
+                <path
+                  d="M18.2 9.9C18.8 9.9 19.2 9.5 19.2 8.9V7.3C19.2 6.3 18.4 5.5 17.4 5.5H6.59999C5.59999 5.5 4.79999 6.3 4.79999 7.3V9C4.79999 9.6 5.19999 10 5.79999 10C6.39999 10 6.79999 9.6 6.79999 9V7.5H9.09999V17.2H7.99999C7.39999 17.2 6.99999 17.6 6.99999 18.2C6.99999 18.8 7.39999 19.2 7.99999 19.2H16C16.6 19.2 17 18.8 17 18.2C17 17.6 16.6 17.2 16 17.2H14.8V7.5H17.1V8.9C17.2 9.5 17.6 9.9 18.2 9.9ZM12.8 17.2H11.1V7.5H12.8V17.2Z"
+                  fill="#D3D3D3"
+                />
+              </svg>
+              Change Lenguage
+            </button>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
             >
-              <path
-                d="M22 15.2998C21.4 15.2998 21 15.6998 21 16.2998V18.9998C21 20.0998 20.1 21.0998 18.9 21.0998H16.2C15.6 21.0998 15.2 21.4998 15.2 22.0998C15.2 22.6998 15.6 23.0998 16.2 23.0998H18.9C21.1 23.0998 23 21.2998 23 18.9998V16.2998C23 15.6998 22.6 15.2998 22 15.2998Z"
-                fill="#D3D3D3"
-              />
-              <path
-                d="M7.8 21.0002H5.1C3.9 21.0002 3 20.1002 3 18.9002V16.2002C3 15.6002 2.6 15.2002 2 15.2002C1.4 15.2002 1 15.6002 1 16.2002V18.9002C1 21.2002 2.8 23.0002 5.1 23.0002H7.8C8.4 23.0002 8.8 22.6002 8.8 22.0002C8.8 21.4002 8.3 21.0002 7.8 21.0002Z"
-                fill="#D3D3D3"
-              />
-              <path
-                d="M2 8.8C2.6 8.8 3 8.4 3 7.8V5.1C3 3.9 3.9 3 5.1 3H7.8C8.4 3 8.8 2.6 8.8 2C8.8 1.4 8.4 1 7.8 1H5.1C2.8 1 1 2.8 1 5.1V7.8C1 8.3 1.4 8.8 2 8.8Z"
-                fill="#D3D3D3"
-              />
-              <path
-                d="M18.9 1H16.2C15.6 1 15.2 1.4 15.2 2C15.2 2.6 15.6 3 16.2 3H18.9C20.1 3 21 3.9 21 5.1V7.8C21 8.4 21.4 8.8 22 8.8C22.6 8.8 23 8.4 23 7.8V5.1C23 2.8 21.2 1 18.9 1Z"
-                fill="#D3D3D3"
-              />
-              <path
-                d="M18.2 9.9C18.8 9.9 19.2 9.5 19.2 8.9V7.3C19.2 6.3 18.4 5.5 17.4 5.5H6.59999C5.59999 5.5 4.79999 6.3 4.79999 7.3V9C4.79999 9.6 5.19999 10 5.79999 10C6.39999 10 6.79999 9.6 6.79999 9V7.5H9.09999V17.2H7.99999C7.39999 17.2 6.99999 17.6 6.99999 18.2C6.99999 18.8 7.39999 19.2 7.99999 19.2H16C16.6 19.2 17 18.8 17 18.2C17 17.6 16.6 17.2 16 17.2H14.8V7.5H17.1V8.9C17.2 9.5 17.6 9.9 18.2 9.9ZM12.8 17.2H11.1V7.5H12.8V17.2Z"
-                fill="#D3D3D3"
-              />
-            </svg>
-            Change Lenguage
-          </button>
-  <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-  {state.data.projects[curProject].languages.map((lang, index) => {
-    return (
-      <li key={index}><a onClick={() => {
-        console.log("CHANGED LANG", lang)
-        setSelectedLanguage(lang)
-      }}>{lang}</a></li>
-    )
-  })}
-  </ul>
-</div>
+              {state.data.projects[curProject].languages.map((lang, index) => {
+                return (
+                  <li key={index}>
+                    <a
+                      onClick={() => {
+                        console.log("CHANGED LANG", lang);
+                        setSelectedLanguage(lang);
+                      }}
+                    >
+                      {lang}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
           <button className="btn gap-2">
             <svg
               width="24"

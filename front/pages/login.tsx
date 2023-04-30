@@ -81,7 +81,7 @@ export default function Index({ state, updateTheme }): JSX.Element {
 
       <div className='flex flex-col gap-2 w-full max-w-md'>
         <input type="text" placeholder="Username" onChange={(e) => { setLoginData({ ...loginData, username: e.target.value }) }} className="input input-bordered input-sm w-full p-4 py-6" />
-        <input type="text" placeholder="Password" onChange={(e) => { setLoginData({ ...loginData, password: e.target.value }) }} className="input input-bordered input-sm w-full p-4 py-6" />
+        <input type="password" placeholder="Password" onChange={(e) => { setLoginData({ ...loginData, password: e.target.value }) }} className="input input-bordered input-sm w-full p-4 py-6" />
         <button className="btn w-full" onClick={() => { loginRequest(); }}>Login</button>
       </div>
     </main>);
