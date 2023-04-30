@@ -24,7 +24,8 @@ Want to ask a topic spcific question just chat with the project ai `@ai ...`
 - chat is fully file supportet send images or other attachments!
 - intelligent attachment processing, automatic image content annotation and voice message to text
 - loging screen and admin user management comes packages and ready
-- automatic api doc and shema generation, fully typed api serializers
+- automatic api doc and shema generation, fully typed api serializers: [`/redoc/`](https://anychat.t1m.me/api/schema/redoc/)
+- CI ready deployment, local development on any individual component at the time.
 
 # The stack
 
