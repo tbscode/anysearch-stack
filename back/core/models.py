@@ -169,6 +169,8 @@ class ChatMessage(models.Model):
 
     file_attachment = models.BinaryField(blank=True, null=True)
 
+    file_meta = models.TextField(blank=True, null=True)
+
     def get_attachment_b64(self):
         """
         TODO: we will not setup full media file handling for this simple project, ultimatily this should also be changed 

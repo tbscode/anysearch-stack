@@ -69,9 +69,15 @@ def handle_socket_message(data, user):
 
     extra_params = {}
     if data.file_attachment:
-        file_data = data.file_attachment.encode()
-        content = base64.b64decode(file_data)
-        extra_params["file_attachment"] = content
+        #file_data = data.file_attachment.encode()
+        #content = base64.b64decode(file_data)
+        file_meta, file_content = data.file_attachment.split(',')
+        print("meta", file_meta, file_content)
+        binary_data = base64.b64decode(file_content)
+
+        print("RECEIVED FILE ATTACHMENT")
+        extra_params["file_attachment"] = binary_data
+        extra_params["file_meta"] = file_meta
 
     # translate the message in all languages that are used in that project
     # TODO ... which api to use again ?

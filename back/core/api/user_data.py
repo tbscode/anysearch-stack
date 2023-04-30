@@ -29,7 +29,7 @@ def get_project_participants(project):
 def serialize_message(message):
     attachment = None
     if message.file_attachment:
-        attachment = message.get_attachment_b64()
+        attachment = message.file_meta + "," + message.get_attachment_b64()
     return {
         "time": str(message.time),
         "data": message.data,
