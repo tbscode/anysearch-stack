@@ -22,9 +22,9 @@ import base64
 
 import sys
 import markdown2
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
+#from reportlab.lib.pagesizes import letter
+#from reportlab.platypus import SimpleDocTemplate, Paragraph
+#from reportlab.lib.styles import getSampleStyleSheet
 
 
 def markdown_to_pdf(markdown_text, output_file):
@@ -237,12 +237,12 @@ def request_report(request):
 
     new_message = ChatMessage.objects.create(
         project=project,
-        original_message=msg,
+        original_message=out,
         sender=ai_user_for_project,
         file_attachment=file_content_bytes,
         file_meta="data:application/pdf;base64",
         data=translate_to_all_langs_in_list(
-            msg, project_langs, str("english")),
+            "hallo", project_langs, str("english")),
     )
     send_message(new_message)
 

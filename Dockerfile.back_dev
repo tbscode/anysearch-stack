@@ -1,9 +1,10 @@
 FROM ghcr.io/tbscode/tims-packages_alpine_langchain:latest
 
-RUN apk add --no-cache mupdf mupdf-tools mupdf-dev gcc musl-dev freetype-dev jpeg jbig2dec freetype openssl
-RUN ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h \
-    && ln -s /usr/include/freetype2/freetype/ /usr/include/freetype
-RUN pip install pymupdf
+#RUN apk add --no-cache mupdf mupdf-tools mupdf-dev gcc musl-dev freetype-dev jpeg jbig2dec freetype openssl
+#RUN ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h \
+#    && ln -s /usr/include/freetype2/freetype/ /usr/include/freetype
+
+# RUN pip install pymupdf
 
 WORKDIR /back
 
