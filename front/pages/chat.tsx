@@ -15,6 +15,21 @@ export const getCookiesAsObject = () => {
   );
 };
 
+function getBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      let encoded = reader.result.toString()
+      if ((encoded.length % 4) > 0) {
+        encoded += '='.repeat(4 - (encoded.length % 4));
+      }
+      resolve(encoded);
+    };
+    reader.onerror = error => reject(error);
+  });
+}
+
 export const getServerSideProps = async ({ req }: { req: any }) => {
   if (req.method == "POST") {
     const streamPromise = new Promise((resolve, reject) => {
@@ -276,6 +291,19 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                 setInputState(e.target.value);
               }}
               onKeyPress={(e) => {
+                // we need to check if a file is present, then we would also send the b64 encoded file
+                // 
+                console.log("SEND triggered")
+                if( document.getElementById("fileUpload").files.length == 0 ){
+                    console.log("no files selected");
+                }else{
+                  console.log("files selected", );
+                  getBase64(document.getElementById("fileUpload").files[0]).then(
+                    data => {
+                      console.log("File converted", data)
+                    }
+                  )
+                }
                 if (
                   e.key === "Enter" &&
                   !e.shiftKey &&
@@ -287,6 +315,7 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
                 }
               }}
             />
+            <input type="file" className="file-input file-input-bordered w-full max-w-xs" id="fileUpload"/>
             <button
               className="btn rounded-r-xl rounded-l-4xl"
               onClick={(e) => {
