@@ -1,8 +1,13 @@
 FROM ghcr.io/tbscode/tims-packages_alpine_langchain:latest
 
-RUN apk add --no-cache mupdf mupdf-tools mupdf-dev gcc musl-dev freetype-dev jpeg jbig2dec freetype openssl
-RUN ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h \
-    && ln -s /usr/include/freetype2/freetype/ /usr/include/freetype
+#RUN apk add --no-cache mupdf mupdf-tools mupdf-dev gcc musl-dev freetype-dev jpeg jbig2dec freetype openssl
+
+RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.14/community' >> /etc/apk/repositories
+RUN echo 'https://dl-cdn.alpinelinux.org/alpine/v3.14/main' >> /etc/apk/repositories
+RUN apk update
+RUN apk add xvfb
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing wkhtmltopdf
+
 
 COPY . /back
 WORKDIR /back
@@ -12,6 +17,9 @@ RUN apt-get update && apt-get install -y wkhtmltopdf
 
 
 ENV PIP_ROOT_USER_ACTION=ignore
+
+RUN ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h \
+    && ln -s /usr/include/freetype2/freetype/ /usr/include/freetype
 
 COPY ./requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
