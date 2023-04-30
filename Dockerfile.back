@@ -1,9 +1,16 @@
 FROM ghcr.io/tbscode/tims-packages_alpine_langchain:latest
 
+RUN apk add --no-cache mupdf mupdf-tools mupdf-dev gcc musl-dev freetype-dev jpeg jbig2dec freetype openssl
+RUN ln -s /usr/include/freetype2/ft2build.h /usr/include/ft2build.h \
+    && ln -s /usr/include/freetype2/freetype/ /usr/include/freetype
+# RUN pip install pymupdf
+
 COPY . /back
 WORKDIR /back
 
 RUN apk add --no-cache git
+RUN apt-get update && apt-get install -y wkhtmltopdf 
+
 
 ENV PIP_ROOT_USER_ACTION=ignore
 

@@ -20,6 +20,30 @@ from core.mdconverter import convert_markdown
 from uuid import uuid4
 import base64
 
+import sys
+import markdown2
+#from reportlab.lib.pagesizes import letter
+#from reportlab.platypus import SimpleDocTemplate, Paragraph
+#from reportlab.lib.styles import getSampleStyleSheet
+
+
+def markdown_to_pdf(markdown_text, output_file):
+    # Read input markdown file
+    # Convert markdown to HTML
+    html_text = markdown2.markdown(markdown_text)
+
+    # Create a PDF document
+    doc = SimpleDocTemplate(output_file, pagesize=letter)
+
+    # Get the default Paragraph style
+    style = getSampleStyleSheet()['BodyText']
+
+    # Convert HTML to a list of Paragraphs
+    paragraphs = [Paragraph(p, style) for p in html_text.split('<br />')]
+
+    # Build the PDF document using the paragraphs
+    doc.build(paragraphs)
+
 
 def pdf_to_base64(file_path):
     with open(file_path, "rb") as pdf_file:
@@ -105,8 +129,10 @@ def request_report(request):
 
     prompts = [
         "based on the whole conversation determine the topic of the project and generate a short description",
-        "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list"
-    ]
+        "Based on the whole conversation plase generate an outline of which events took place and return it as a markdown list",
+        "Based on the whole conversation plase generate timeline of events that took flace"]
+    #"Based on the whole conversation plase judge how the project performance was"
+    # ]
 
     parts = [
         "description",
@@ -138,7 +164,7 @@ def request_report(request):
     i = 0
     for pompt in prompts:
         past_messages = ChatMessage.objects.filter(
-            project=project).order_by("-time")
+            project=project).order_by("-time")[:15]  # TODO: prompt splitting should happen here!
 
         # setup a db agent:
         # It gets the full message history
@@ -197,27 +223,29 @@ def request_report(request):
 
     msg = "Heres your report"
 
-    temp_file = f"{uuid4()}"
-    convert_markdown(out, output_folder_path="/tmp",
-                     output_format="pdf", output_file_name=temp_file)
-    temp_file = "/tmp/" + temp_file + ".pdf"
+    uuid = uuid4()
+    # convert_markdown(out, output_folder_path="/tmp",
+    #                 output_file_name=str(uuid))
+    temp_file = f"/tmp/{uuid}.md"
+    #markdown_to_pdf(out, temp_file)
+    with open(temp_file, "w") as file:
+        file.write(out)
 
-    base64 = pdf_to_base64(temp_file)
+    base64_string = pdf_to_base64(temp_file)
+    print("base64_string", base64_string)
 
-    file_meta, file_content = base64.split(',')
+    with open(temp_file, 'rb') as file:
+        file_content_bytes = file.read()
 
     new_message = ChatMessage.objects.create(
         project=project,
-        original_message=msg,
+        original_message=out,
         sender=ai_user_for_project,
-        file_attachment=file_content,
-        file_meta=file_meta,
+        file_attachment=file_content_bytes,
+        file_meta="data:text/markdown;base64",
         data=translate_to_all_langs_in_list(
-            msg, project_langs, str("english")),
+            "hallo", project_langs, str("english")),
     )
     send_message(new_message)
-
-    print(base64)
-    # Report
 
     return Response(status=status.HTTP_200_OK)
