@@ -123,6 +123,10 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
   };
 
   useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+
     if (lastMessage !== null) {
       setMessageHistory((prev) => prev.concat(lastMessage));
       const data = JSON.parse(lastMessage.data);
@@ -211,6 +215,24 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
 
     setState(newState);
   };
+  
+  
+  const reportRequest = (project_hash) => {
+    fetch('/api/report', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookiesAsObject().csrftoken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        project_hash: project_hash
+      })
+    }).then((res) => {
+      if(res.ok){
+        // The ai should be replying
+      }
+    })
+  }
 
   const filteredProjects = state.data.projects.filter((project) =>
     project.name.toLowerCase().includes(inputValue.toLowerCase())
@@ -468,7 +490,9 @@ export default function Chat({ state, setState, updateTheme }): JSX.Element {
               })}
             </ul>
           </div>
-          <button className="btn gap-2">
+          <button className="btn gap-2" onClick={() => {
+            reportRequest(state.data.projects[curProject].project_hash)
+          }}>
             <svg
               width="24"
               height="24"
