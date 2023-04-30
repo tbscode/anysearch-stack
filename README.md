@@ -1,6 +1,34 @@
-# Anysearch Stack
+# Anychat ( our tum.ai hackathon submission )
 
-Anysearch Stack is a production-ready Kubernetes deployment for building dynamic web applications. It includes a Django backend and a React + Next.js frontend.
+Anychat the first ai supportet multi-lingual group chat for project works planning and reports!
+
+## some of the sills
+
+Currently deployed at [`anychat.t1m.me`](https://anychat.t1m.me)
+
+You can login with the test user: `testUser1`, pw: `Test123!`
+And If you want to test the peer to peer chat you can login with any of `testUser<ID>` for ids in 1-20.
+
+Send a chat message and see it appear in all connected user chat with translations in all languages.
+Want to ask a topic spcific question just chat with the project ai `@ai ...`
+
+- fully scalable production ready kubernetes deployment, that can be run completely locally in development
+- micro service contain architecture
+- custom django channels redis implementation for manging multiple project groups and distribting messages to connected users
+- fully websocket enabled group chat
+- topic specific ai assistant in any group chat, just start you message with `@ai ...`
+- intelligent ai agent that can device when to use specic tools and is customizable with multiple tools
+- agent implementation is based on langchain and support _ANY_ LLM as base, so we can deploy our own model in the future or switch the api whenever we want
+- the ai has internet access, one of the tools is that the ai can decide when to lookup something in the internet
+- autmatic translation in _ALL_ languages of a projects participants: everybody can send messages in their choosen language and still read everything!
+- chat is fully file supportet send images or other attachments!
+- intelligent attachment processing, automatic image content annotation and voice message to text
+- loging screen and admin user management comes packages and ready
+- automatic api doc and shema generation, fully typed api serializers
+
+# The stack
+
+The anychat stack Stack is a production-ready Kubernetes deployment for building dynamic web applications. It includes a Django backend and a React + Next.js frontend.
 
 This project is uses [`Tim's Stack`](https://github.com/tbscode/tiny-django).
 
